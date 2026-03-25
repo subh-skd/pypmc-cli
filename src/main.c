@@ -14,7 +14,7 @@
 #include <unistd.h>
 #endif
 
-#define PYPMC_VERSION "0.1.1"
+#define PYPMC_VERSION "0.1.2"
 
 /* ── ANSI colors ─────────────────────────────────────────────────── */
 

@@ -116,7 +116,14 @@ const char *get_activate_command(const char *project_dir)
     static char cmd[MAX_PATH_LEN];
 
 #ifdef _WIN32
-    snprintf(cmd, sizeof(cmd), "%s/%s/Activate.ps1", project_dir, VENV_DIR);
+    /* On Windows, check if running inside Git Bash / MSYS (SHELL is set) */
+    const char *shell = getenv("SHELL");
+    if (shell)
+        snprintf(cmd, sizeof(cmd), "source %s/%s/Scripts/activate",
+                 project_dir, VENV_DIR);
+    else
+        snprintf(cmd, sizeof(cmd), "%s/%s/Scripts/Activate.ps1",
+                 project_dir, VENV_DIR);
 #else
     const char *shell = getenv("SHELL");
     if (!shell)
