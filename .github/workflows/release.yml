@@ -1,0 +1,70 @@
+name: Build & Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: pypmc-linux-amd64
+            cmake_extra: ""
+          - os: macos-latest
+            artifact: pypmc-macos-amd64
+            cmake_extra: ""
+          - os: windows-latest
+            artifact: pypmc-windows-amd64.exe
+            cmake_extra: ""
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build with CMake
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release
+
+      - name: Rename binary (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: cp build/pypmc ${{ matrix.artifact }}
+
+      - name: Rename binary (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: cp build/Release/pypmc.exe ${{ matrix.artifact }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}
+
+  release:
+    needs: build
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/pypmc-linux-amd64/pypmc-linux-amd64
+            artifacts/pypmc-macos-amd64/pypmc-macos-amd64
+            artifacts/pypmc-windows-amd64.exe/pypmc-windows-amd64.exe
