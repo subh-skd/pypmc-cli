@@ -74,28 +74,28 @@ if !errorlevel! neq 0 (
 :: ── add to PATH if not already there ────────────────────────────────
 
 set "PATH_ADDED=0"
-echo %PATH% | findstr /i /c:"!INSTALL_DIR!" >nul 2>&1
-if !errorlevel! neq 0 (
-    if "!IS_ADMIN!"=="1" (
+if "!IS_ADMIN!"=="1" (
+    for /f "tokens=2*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path 2^>nul') do set "SYS_PATH=%%b"
+    echo !SYS_PATH! | findstr /i /c:"!INSTALL_DIR!" >nul 2>&1
+    if !errorlevel! neq 0 (
         echo Adding !INSTALL_DIR! to system PATH...
-        for /f "tokens=2*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path 2^>nul') do set "SYS_PATH=%%b"
-        if defined SYS_PATH (
-            reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /t REG_EXPAND_SZ /d "!SYS_PATH!;!INSTALL_DIR!" /f >nul 2>&1
-        ) else (
-            reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /t REG_EXPAND_SZ /d "!INSTALL_DIR!" /f >nul 2>&1
-        )
+        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /t REG_EXPAND_SZ /d "!SYS_PATH!;!INSTALL_DIR!" /f >nul 2>&1
         set "PATH_ADDED=1"
-    ) else (
+        set "PATH=!PATH!;!INSTALL_DIR!"
+    )
+) else (
+    for /f "tokens=2*" %%a in ('reg query "HKCU\Environment" /v Path 2^>nul') do set "USER_PATH=%%b"
+    echo !USER_PATH! | findstr /i /c:"!INSTALL_DIR!" >nul 2>&1
+    if !errorlevel! neq 0 (
         echo Adding !INSTALL_DIR! to user PATH...
-        for /f "tokens=2*" %%a in ('reg query "HKCU\Environment" /v Path 2^>nul') do set "USER_PATH=%%b"
         if defined USER_PATH (
             setx Path "!USER_PATH!;!INSTALL_DIR!" >nul 2>&1
         ) else (
             setx Path "!INSTALL_DIR!" >nul 2>&1
         )
         set "PATH_ADDED=1"
+        set "PATH=!PATH!;!INSTALL_DIR!"
     )
-    set "PATH=%PATH%;!INSTALL_DIR!"
 )
 
 :: ── verify ──────────────────────────────────────────────────────────
