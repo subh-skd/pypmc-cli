@@ -49,45 +49,64 @@ if %errorlevel% neq 0 (
     goto :fail
 )
 
+:: ── check admin privileges ─────────────────────────────────────────
+
+net session >nul 2>&1
+if !errorlevel! neq 0 (
+    set "INSTALL_DIR=%LOCALAPPDATA%\pypmc"
+    set "IS_ADMIN=0"
+) else (
+    set "IS_ADMIN=1"
+)
+
 :: ── install ─────────────────────────────────────────────────────────
 
-echo Installing to %INSTALL_DIR%...
+echo Installing to !INSTALL_DIR!...
 
-if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
+if not exist "!INSTALL_DIR!" mkdir "!INSTALL_DIR!"
 
-move /y "%TMPFILE%" "%INSTALL_DIR%\%BIN_NAME%" >nul
-if %errorlevel% neq 0 (
-    echo Error: Failed to move binary to %INSTALL_DIR%
+move /y "%TMPFILE%" "!INSTALL_DIR!\%BIN_NAME%" >nul
+if !errorlevel! neq 0 (
+    echo Error: Failed to move binary to !INSTALL_DIR!
     goto :fail
 )
 
 :: ── add to PATH if not already there ────────────────────────────────
 
-echo %PATH% | findstr /i /c:"%INSTALL_DIR%" >nul 2>&1
-if %errorlevel% neq 0 (
-    echo Adding %INSTALL_DIR% to system PATH...
-    for /f "tokens=2*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path 2^>nul') do set "SYS_PATH=%%b"
-    if defined SYS_PATH (
-        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /t REG_EXPAND_SZ /d "!SYS_PATH!;%INSTALL_DIR%" /f >nul 2>&1
+set "PATH_ADDED=0"
+echo %PATH% | findstr /i /c:"!INSTALL_DIR!" >nul 2>&1
+if !errorlevel! neq 0 (
+    if "!IS_ADMIN!"=="1" (
+        echo Adding !INSTALL_DIR! to system PATH...
+        for /f "tokens=2*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path 2^>nul') do set "SYS_PATH=%%b"
+        if defined SYS_PATH (
+            reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /t REG_EXPAND_SZ /d "!SYS_PATH!;!INSTALL_DIR!" /f >nul 2>&1
+        ) else (
+            reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /t REG_EXPAND_SZ /d "!INSTALL_DIR!" /f >nul 2>&1
+        )
+        set "PATH_ADDED=1"
     ) else (
-        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /t REG_EXPAND_SZ /d "%INSTALL_DIR%" /f >nul 2>&1
+        echo Adding !INSTALL_DIR! to user PATH...
+        for /f "tokens=2*" %%a in ('reg query "HKCU\Environment" /v Path 2^>nul') do set "USER_PATH=%%b"
+        if defined USER_PATH (
+            setx Path "!USER_PATH!;!INSTALL_DIR!" >nul 2>&1
+        ) else (
+            setx Path "!INSTALL_DIR!" >nul 2>&1
+        )
+        set "PATH_ADDED=1"
     )
-    if !errorlevel! neq 0 (
-        echo Error: Failed to update system PATH. Please run this script as Administrator.
-        goto :fail
-    )
-    set "PATH=%PATH%;%INSTALL_DIR%"
+    set "PATH=%PATH%;!INSTALL_DIR!"
 )
 
 :: ── verify ──────────────────────────────────────────────────────────
 
 echo.
-"%INSTALL_DIR%\%BIN_NAME%" --version
-if %errorlevel% equ 0 (
+"!INSTALL_DIR!\%BIN_NAME%" --version
+if !errorlevel! equ 0 (
     echo.
     echo pypmc installed successfully!
 ) else (
-    echo pypmc was installed to %INSTALL_DIR%\%BIN_NAME%
+    echo pypmc was installed to !INSTALL_DIR!\%BIN_NAME%
 )
 
 echo.
@@ -95,8 +114,11 @@ echo Get started:
 echo   mkdir my-project ^&^& cd my-project
 echo   pypmc init
 echo.
+if "!IS_ADMIN!"=="0" (
+    echo NOTE: Installed to user directory. For system-wide access, re-run as Administrator.
+)
 echo NOTE: Restart your terminal for PATH changes to take effect.
-echo       Path added: %INSTALL_DIR%
+echo       Installed to: !INSTALL_DIR!\%BIN_NAME%
 
 goto :done
 

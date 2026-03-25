@@ -4,8 +4,16 @@ $ErrorActionPreference = "Stop"
 
 $Repo = "subh-skd/pypmc-cli"
 $BinName = "pypmc.exe"
-$InstallDir = "$env:ProgramFiles\pypmc"
 $AssetName = "pypmc-windows-amd64.exe"
+
+# ── check admin privileges ──────────────────────────────────────────
+
+$IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if ($IsAdmin) {
+    $InstallDir = "$env:ProgramFiles\pypmc"
+} else {
+    $InstallDir = "$env:LOCALAPPDATA\pypmc"
+}
 
 # ── fetch latest release tag ─────────────────────────────────────────
 
@@ -50,15 +58,19 @@ Move-Item -Path $TmpFile -Destination $DestPath -Force
 
 # ── add to PATH if not already there ────────────────────────────────
 
-$SystemPath = [Environment]::GetEnvironmentVariable("Path", "Machine")
-if ($SystemPath -notlike "*$InstallDir*") {
-    Write-Host "Adding $InstallDir to system PATH..."
-    try {
+if ($IsAdmin) {
+    $SystemPath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+    if ($SystemPath -notlike "*$InstallDir*") {
+        Write-Host "Adding $InstallDir to system PATH..."
         [Environment]::SetEnvironmentVariable("Path", "$SystemPath;$InstallDir", "Machine")
         $env:Path = "$env:Path;$InstallDir"
-    } catch {
-        Write-Host "Error: Failed to update system PATH. Please run this script as Administrator." -ForegroundColor Red
-        exit 1
+    }
+} else {
+    $UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
+    if ($UserPath -notlike "*$InstallDir*") {
+        Write-Host "Adding $InstallDir to user PATH..."
+        [Environment]::SetEnvironmentVariable("Path", "$UserPath;$InstallDir", "User")
+        $env:Path = "$env:Path;$InstallDir"
     }
 }
 
@@ -78,12 +90,8 @@ Write-Host "Get started:" -ForegroundColor Cyan
 Write-Host "  mkdir my-project; cd my-project"
 Write-Host "  pypmc init"
 Write-Host ""
+if (-not $IsAdmin) {
+    Write-Host "NOTE: Installed to user directory. For system-wide access, re-run as Administrator." -ForegroundColor Yellow
+}
 Write-Host "NOTE: Restart your terminal for PATH changes to take effect." -ForegroundColor Yellow
 Write-Host "  Installed to : $DestPath" -ForegroundColor Yellow
-Write-Host "  Path added   : $InstallDir" -ForegroundColor Yellow
-Write-Host ""
-Write-Host "If pypmc is not recognized after restarting, manually add to PATH:" -ForegroundColor Yellow
-Write-Host "  1. Open Settings > System > About > Advanced system settings"
-Write-Host "  2. Click Environment Variables"
-Write-Host "  3. Under System variables, edit Path and add:" -ForegroundColor Yellow
-Write-Host "     $InstallDir" -ForegroundColor Cyan
