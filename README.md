@@ -44,11 +44,11 @@ The installer downloads the latest release binary, places it in the correct loca
 
 The install scripts add pypmc to your PATH automatically. If `pypmc` is not recognized after installation, **restart your terminal** and try again. If it still doesn't work, add the install location manually:
 
-| Platform | Install location | What to add to PATH |
-|---|---|---|
-| Linux | `/usr/local/bin/pypmc` | Usually already in PATH |
-| macOS | `/usr/local/bin/pypmc` | Usually already in PATH |
-| Windows | `%ProgramFiles%\pypmc\pypmc.exe` | `%ProgramFiles%\pypmc` |
+| Platform | Install location                 | What to add to PATH     |
+| -------- | -------------------------------- | ----------------------- |
+| Linux    | `/usr/local/bin/pypmc`           | Usually already in PATH |
+| macOS    | `/usr/local/bin/pypmc`           | Usually already in PATH |
+| Windows  | `%ProgramFiles%\pypmc\pypmc.exe` | `%ProgramFiles%\pypmc`  |
 
 <details>
 <summary><b>Linux / macOS — manual PATH setup</b></summary>
@@ -70,6 +70,7 @@ fish_add_path /usr/local/bin
 <summary><b>Windows — manual PATH setup</b></summary>
 
 **Option 1: Via GUI**
+
 1. Press `Win + R`, type `sysdm.cpl`, press Enter
 2. Go to **Advanced** tab > **Environment Variables**
 3. Under **System variables**, select `Path` and click **Edit**
@@ -77,11 +78,13 @@ fish_add_path /usr/local/bin
 5. Click OK, then restart your terminal
 
 **Option 2: Via CMD**
+
 ```cmd
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /t REG_EXPAND_SZ /d "%Path%;%ProgramFiles%\pypmc" /f
 ```
 
 **Option 3: Via PowerShell**
+
 ```powershell
 [Environment]::SetEnvironmentVariable("Path", "$([Environment]::GetEnvironmentVariable('Path', 'Machine'));$env:ProgramFiles\pypmc", "Machine")
 ```
@@ -92,13 +95,13 @@ reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v P
 
 Download the latest binary from the [Releases](../../releases) page:
 
-| Platform | Binary |
-|---|---|
-| Linux (x64) | `pypmc-linux-amd64` |
-| Linux (ARM64) | `pypmc-linux-arm64` |
-| macOS (x64) | `pypmc-macos-amd64` |
-| macOS (Apple Silicon) | `pypmc-macos-arm64` |
-| Windows (x64) | `pypmc-windows-amd64.exe` |
+| Platform              | Binary                    |
+| --------------------- | ------------------------- |
+| Linux (x64)           | `pypmc-linux-amd64`       |
+| Linux (ARM64)         | `pypmc-linux-arm64`       |
+| macOS (x64)           | `pypmc-macos-amd64`       |
+| macOS (Apple Silicon) | `pypmc-macos-arm64`       |
+| Windows (x64)         | `pypmc-windows-amd64.exe` |
 
 ```bash
 # Linux / macOS
@@ -172,18 +175,18 @@ version: 1.0.0
 description: My awesome project
 author: Your Name
 license: MIT
-python: '>=3.8'
+python: ">=3.8"
 
 scripts:
   start: python main.py
   test: pytest
 
 dependencies:
-  requests: '==2.31.0'
-  flask: '==3.0.0'
+  requests: "==2.31.0"
+  flask: "==3.0.0"
 
 dev_dependencies:
-  pytest: '==8.0.0'
+  pytest: "==8.0.0"
 ```
 
 ## package-lock.yml
@@ -194,18 +197,18 @@ The lockfile captures exact versions of all installed packages for reproducible 
 lockfile_version: 1
 packages:
   requests:
-    version: '2.31.0'
+    version: "2.31.0"
   urllib3:
-    version: '2.1.0'
+    version: "2.1.0"
   charset-normalizer:
-    version: '3.3.2'
+    version: "3.3.2"
 ```
 
 ## Command Aliases
 
-| Full Command | Alias |
-|---|---|
-| `pypmc install` | `pypmc i` |
+| Full Command      | Alias      |
+| ----------------- | ---------- |
+| `pypmc install`   | `pypmc i`  |
 | `pypmc uninstall` | `pypmc rm` |
 
 ## How It Works
@@ -222,6 +225,7 @@ packages:
 pypmc supports tab-completion for bash, zsh, and fish. Completions cover commands, flags, package names from `package.yml`, and script names.
 
 **bash:**
+
 ```bash
 eval "$(pypmc completions bash)"
 # Or add to ~/.bashrc for persistence
@@ -229,6 +233,7 @@ echo 'eval "$(pypmc completions bash)"' >> ~/.bashrc
 ```
 
 **zsh:**
+
 ```zsh
 eval "$(pypmc completions zsh)"
 # Or add to ~/.zshrc for persistence
@@ -236,19 +241,16 @@ echo 'eval "$(pypmc completions zsh)"' >> ~/.zshrc
 ```
 
 **fish:**
+
 ```fish
 pypmc completions fish | source
 # Or save permanently
 pypmc completions fish > ~/.config/fish/completions/pypmc.fish
 ```
 
-## Publishing
+## Author
 
-This project uses GitHub Actions to automatically build cross-platform binaries. To publish:
-
-1. Push your code to GitHub
-2. Create a new Release — the workflow builds Linux (amd64/arm64), macOS (amd64/arm64), and Windows binaries and attaches them to the release
-3. Users download the binary for their platform, no compilation needed
+Subhendu Kumar
 
 ## License
 
