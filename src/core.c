@@ -240,9 +240,13 @@ static void collect_requires(const char *project_dir,
                 return;
             }
 
-            /* parse comma-separated list */
+            /* collect all token names before recursing — avoids strtok
+               re-entrancy issues when recursive calls use strtok internally */
+            char req_names[64][MAX_NAME];
+            int rn_count = 0;
+
             char *tok = strtok(reqs, ",");
-            while (tok)
+            while (tok && rn_count < 64)
             {
                 while (*tok == ' ')
                     tok++;
@@ -251,47 +255,42 @@ static void collect_requires(const char *project_dir,
                        (tok[tlen - 1] == ' ' || tok[tlen - 1] == '\r'))
                     tok[--tlen] = '\0';
 
-                if (tlen == 0)
+                if (tlen > 0)
                 {
-                    tok = strtok(NULL, ",");
-                    continue;
+                    strncpy(req_names[rn_count], tok, MAX_NAME - 1);
+                    req_names[rn_count][MAX_NAME - 1] = '\0';
+                    for (size_t i = 0; req_names[rn_count][i]; i++)
+                        req_names[rn_count][i] =
+                            (char)tolower(req_names[rn_count][i]);
+                    rn_count++;
                 }
+                tok = strtok(NULL, ",");
+            }
 
-                /* lowercase */
-                char req_name[MAX_NAME];
-                strncpy(req_name, tok, MAX_NAME - 1);
-                req_name[MAX_NAME - 1] = '\0';
-                for (size_t i = 0; req_name[i]; i++)
-                    req_name[i] = (char)tolower(req_name[i]);
+            free(output);
 
-                /* check if already in collected */
+            /* add new ones to required set and recurse into each */
+            for (int i = 0; i < rn_count; i++)
+            {
                 int found = 0;
-                for (int i = 0; i < *req_count; i++)
+                for (int j = 0; j < *req_count; j++)
                 {
-                    if (strcmp(required[i], req_name) == 0)
+                    if (strcmp(required[j], req_names[i]) == 0)
                     {
                         found = 1;
                         break;
                     }
                 }
-
                 if (!found && *req_count < max_req)
                 {
-                    strncpy(required[*req_count], req_name, MAX_NAME - 1);
+                    strncpy(required[*req_count], req_names[i], MAX_NAME - 1);
                     required[*req_count][MAX_NAME - 1] = '\0';
                     (*req_count)++;
-                    /* Note: strtok state is destroyed by recursive call,
-                       so we restart after this. This is fine since we process
-                       the Requires line which is a single line. */
-                    free(output);
-                    collect_requires(project_dir, req_name, required, req_count,
-                                     max_req);
-                    return;
+                    collect_requires(project_dir, req_names[i], required,
+                                     req_count, max_req);
                 }
-
-                tok = strtok(NULL, ",");
             }
-            break;
+            return;
         }
         line = strtok(NULL, "\n");
     }

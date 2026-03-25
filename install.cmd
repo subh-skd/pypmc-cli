@@ -1,6 +1,6 @@
 @echo off
 :: pypmc installer for Windows (CMD)
-:: Usage: curl -fsSL https://raw.githubusercontent.com/subh-skd/pypmc-cli/main/install.bat -o install.bat && install.bat
+:: Usage: curl -fsSL https://raw.githubusercontent.com/subh-skd/pypmc-cli/main/install.cmd -o %TEMP%\install-pypmc.cmd && call %TEMP%\install-pypmc.cmd && del %TEMP%\install-pypmc.cmd
 setlocal enabledelayedexpansion
 
 set "REPO=subh-skd/pypmc-cli"
@@ -34,7 +34,7 @@ if "%TAG%"=="" (
     goto :fail
 )
 
-echo Latest version: %TAG%
+echo Latest version: !TAG!
 
 :: ── download binary ─────────────────────────────────────────────────
 
@@ -115,7 +115,7 @@ echo   mkdir my-project ^&^& cd my-project
 echo   pypmc init
 echo.
 if "!IS_ADMIN!"=="0" (
-    echo NOTE: Installed to user directory. For system-wide access, re-run as Administrator.
+    echo NOTE: Installed to user directory. For system-wide access, re-run with an Administrator account.
 )
 echo NOTE: Restart your terminal for PATH changes to take effect.
 echo       Installed to: !INSTALL_DIR!\%BIN_NAME%

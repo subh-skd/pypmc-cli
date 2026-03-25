@@ -1,5 +1,5 @@
 # pypmc installer for Windows
-# Usage: irm https://raw.githubusercontent.com/subh-skd/pypmc-cli/main/install.ps1 | iex
+# Usage: Invoke-WebRequest -Uri https://raw.githubusercontent.com/subh-skd/pypmc-cli/main/install.ps1 -OutFile "$env:TEMP\install-pypmc.ps1"; & "$env:TEMP\install-pypmc.ps1"; Remove-Item "$env:TEMP\install-pypmc.ps1"
 $ErrorActionPreference = "Stop"
 
 $Repo = "subh-skd/pypmc-cli"
@@ -91,7 +91,7 @@ Write-Host "  mkdir my-project; cd my-project"
 Write-Host "  pypmc init"
 Write-Host ""
 if (-not $IsAdmin) {
-    Write-Host "NOTE: Installed to user directory. For system-wide access, re-run as Administrator." -ForegroundColor Yellow
+    Write-Host "NOTE: Installed to user directory. For system-wide access, re-run with an Administrator account." -ForegroundColor Yellow
 }
 Write-Host "NOTE: Restart your terminal for PATH changes to take effect." -ForegroundColor Yellow
 Write-Host "  Installed to : $DestPath" -ForegroundColor Yellow
