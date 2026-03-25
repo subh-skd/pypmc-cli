@@ -4,7 +4,7 @@ $ErrorActionPreference = "Stop"
 
 $Repo = "subh-skd/pypmc-cli"
 $BinName = "pypmc.exe"
-$InstallDir = "$env:LOCALAPPDATA\pypmc"
+$InstallDir = "$env:ProgramFiles\pypmc"
 $AssetName = "pypmc-windows-amd64.exe"
 
 # ── fetch latest release tag ─────────────────────────────────────────
@@ -50,11 +50,16 @@ Move-Item -Path $TmpFile -Destination $DestPath -Force
 
 # ── add to PATH if not already there ────────────────────────────────
 
-$UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
-if ($UserPath -notlike "*$InstallDir*") {
-    Write-Host "Adding $InstallDir to user PATH..."
-    [Environment]::SetEnvironmentVariable("Path", "$UserPath;$InstallDir", "User")
-    $env:Path = "$env:Path;$InstallDir"
+$SystemPath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+if ($SystemPath -notlike "*$InstallDir*") {
+    Write-Host "Adding $InstallDir to system PATH..."
+    try {
+        [Environment]::SetEnvironmentVariable("Path", "$SystemPath;$InstallDir", "Machine")
+        $env:Path = "$env:Path;$InstallDir"
+    } catch {
+        Write-Host "Error: Failed to update system PATH. Please run this script as Administrator." -ForegroundColor Red
+        exit 1
+    }
 }
 
 # ── verify ───────────────────────────────────────────────────────────
@@ -80,5 +85,5 @@ Write-Host ""
 Write-Host "If pypmc is not recognized after restarting, manually add to PATH:" -ForegroundColor Yellow
 Write-Host "  1. Open Settings > System > About > Advanced system settings"
 Write-Host "  2. Click Environment Variables"
-Write-Host "  3. Under User variables, edit Path and add:" -ForegroundColor Yellow
+Write-Host "  3. Under System variables, edit Path and add:" -ForegroundColor Yellow
 Write-Host "     $InstallDir" -ForegroundColor Cyan

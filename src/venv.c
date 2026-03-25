@@ -26,27 +26,32 @@ int _pclose(FILE *stream);
 
 #define VENV_DIR ".venv"
 
-void get_venv_path(const char *project_dir, char *out, size_t max) {
+void get_venv_path(const char *project_dir, char *out, size_t max)
+{
     snprintf(out, max, "%s/%s", project_dir, VENV_DIR);
 }
 
-void get_python_exe(const char *project_dir, char *out, size_t max) {
+void get_python_exe(const char *project_dir, char *out, size_t max)
+{
     snprintf(out, max, "%s/%s/%s/%s", project_dir, VENV_DIR, VENV_BIN,
              PYTHON_EXE);
 }
 
-void get_pip_exe(const char *project_dir, char *out, size_t max) {
+void get_pip_exe(const char *project_dir, char *out, size_t max)
+{
     snprintf(out, max, "%s/%s/%s/%s", project_dir, VENV_DIR, VENV_BIN,
              PIP_EXE);
 }
 
-int venv_exists(const char *project_dir) {
+int venv_exists(const char *project_dir)
+{
     char exe[MAX_PATH_LEN];
     get_python_exe(project_dir, exe, sizeof(exe));
     return access(exe, F_OK) == 0;
 }
 
-int create_venv(const char *project_dir) {
+int create_venv(const char *project_dir)
+{
     if (venv_exists(project_dir))
         return 0;
 
@@ -56,12 +61,14 @@ int create_venv(const char *project_dir) {
     return system(cmd);
 }
 
-void ensure_venv(const char *project_dir) {
+void ensure_venv(const char *project_dir)
+{
     if (!venv_exists(project_dir))
         create_venv(project_dir);
 }
 
-int run_pip(const char *project_dir, const char *args) {
+int run_pip(const char *project_dir, const char *args)
+{
     char pip[MAX_PATH_LEN];
     get_pip_exe(project_dir, pip, sizeof(pip));
 
@@ -71,7 +78,8 @@ int run_pip(const char *project_dir, const char *args) {
 }
 
 int run_pip_capture(const char *project_dir, const char *args, char *output,
-                    int max_len) {
+                    int max_len)
+{
     char pip[MAX_PATH_LEN];
     get_pip_exe(project_dir, pip, sizeof(pip));
 
@@ -83,13 +91,15 @@ int run_pip_capture(const char *project_dir, const char *args, char *output,
 #endif
 
     FILE *fp = popen(cmd, "r");
-    if (!fp) {
+    if (!fp)
+    {
         output[0] = '\0';
         return -1;
     }
 
     int total = 0;
-    while (total < max_len - 1) {
+    while (total < max_len - 1)
+    {
         int c = fgetc(fp);
         if (c == EOF)
             break;
@@ -101,7 +111,8 @@ int run_pip_capture(const char *project_dir, const char *args, char *output,
     return status;
 }
 
-const char *get_activate_command(const char *project_dir) {
+const char *get_activate_command(const char *project_dir)
+{
     static char cmd[MAX_PATH_LEN];
 
 #ifdef _WIN32

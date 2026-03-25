@@ -14,7 +14,7 @@
 #include <unistd.h>
 #endif
 
-#define PYPMC_VERSION "0.1.0"
+#define PYPMC_VERSION "0.1.1"
 
 /* ── ANSI colors ─────────────────────────────────────────────────── */
 
@@ -31,7 +31,8 @@
 #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
-static void enable_ansi(void) {
+static void enable_ansi(void)
+{
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     if (hOut == INVALID_HANDLE_VALUE)
         return;
@@ -43,7 +44,8 @@ static void enable_ansi(void) {
 #endif
 
 static void prompt_input(const char *prompt, const char *default_val,
-                         char *out, int max) {
+                         char *out, int max)
+{
     if (default_val && *default_val)
         printf("%s (%s): ", prompt, default_val);
     else
@@ -61,13 +63,15 @@ static void prompt_input(const char *prompt, const char *default_val,
         out[--len] = '\0';
 
     /* use default if empty */
-    if (out[0] == '\0' && default_val) {
+    if (out[0] == '\0' && default_val)
+    {
         strncpy(out, default_val, (size_t)max - 1);
         out[max - 1] = '\0';
     }
 }
 
-static int confirm(const char *prompt) {
+static int confirm(const char *prompt)
+{
     printf("%s [y/N]: ", prompt);
     fflush(stdout);
     char buf[16];
@@ -76,23 +80,28 @@ static int confirm(const char *prompt) {
     return (buf[0] == 'y' || buf[0] == 'Y');
 }
 
-static int has_flag(int argc, char **argv, const char *flag) {
-    for (int i = 2; i < argc; i++) {
+static int has_flag(int argc, char **argv, const char *flag)
+{
+    for (int i = 2; i < argc; i++)
+    {
         if (strcmp(argv[i], flag) == 0)
             return 1;
     }
     return 0;
 }
 
-static const char *get_option(int argc, char **argv, const char *name) {
-    for (int i = 2; i < argc - 1; i++) {
+static const char *get_option(int argc, char **argv, const char *name)
+{
+    for (int i = 2; i < argc - 1; i++)
+    {
         if (strcmp(argv[i], name) == 0)
             return argv[i + 1];
     }
     return NULL;
 }
 
-static void print_usage(void) {
+static void print_usage(void)
+{
     printf("pypmc " PYPMC_VERSION " — An npm-like package manager for Python "
            "(C edition)\n\n");
     printf("Usage: pypmc <command> [options]\n\n");
@@ -124,14 +133,17 @@ static void print_usage(void) {
 
 /* ── command handlers ────────────────────────────────────────────── */
 
-static int cmd_init(int argc, char **argv) {
+static int cmd_init(int argc, char **argv)
+{
     char cwd[MAX_PATH_LEN];
-    if (!getcwd(cwd, sizeof(cwd))) {
+    if (!getcwd(cwd, sizeof(cwd)))
+    {
         fprintf(stderr, "Failed to get current directory\n");
         return 1;
     }
 
-    if (package_yml_exists(cwd)) {
+    if (package_yml_exists(cwd))
+    {
         printf(C_YELLOW "package.yml already exists." C_RESET "\n");
         if (!confirm("Overwrite?"))
             return 0;
@@ -155,7 +167,8 @@ static int cmd_init(int argc, char **argv) {
 
     const char *opt;
 
-    if (yes) {
+    if (yes)
+    {
         opt = get_option(argc, argv, "--name");
         strncpy(name, opt ? opt : default_name, MAX_NAME - 1);
         opt = get_option(argc, argv, "--version");
@@ -168,7 +181,9 @@ static int cmd_init(int argc, char **argv) {
         strncpy(license_str, opt ? opt : "MIT", MAX_VER - 1);
         opt = get_option(argc, argv, "--python");
         strncpy(python, opt ? opt : ">=3.8", MAX_VER - 1);
-    } else {
+    }
+    else
+    {
         opt = get_option(argc, argv, "--name");
         if (opt)
             strncpy(name, opt, MAX_NAME - 1);
@@ -213,7 +228,8 @@ static int cmd_init(int argc, char **argv) {
     return 0;
 }
 
-static int cmd_install(int argc, char **argv) {
+static int cmd_install(int argc, char **argv)
+{
     char cwd[MAX_PATH_LEN];
     if (!getcwd(cwd, sizeof(cwd)))
         return 1;
@@ -224,49 +240,57 @@ static int cmd_install(int argc, char **argv) {
     int pkg_count = 0;
     const char *packages[256];
 
-    for (int i = 2; i < argc; i++) {
+    for (int i = 2; i < argc; i++)
+    {
         if (strcmp(argv[i], "-D") == 0 || strcmp(argv[i], "--save-dev") == 0)
             continue;
         packages[pkg_count++] = argv[i];
     }
 
-    if (pkg_count == 0) {
+    if (pkg_count == 0)
+    {
         return install_all(cwd);
     }
 
     int ret = 0;
-    for (int i = 0; i < pkg_count; i++) {
+    for (int i = 0; i < pkg_count; i++)
+    {
         if (install_package(cwd, packages[i], dev) != 0)
             ret = 1;
     }
     return ret;
 }
 
-static int cmd_uninstall(int argc, char **argv) {
+static int cmd_uninstall(int argc, char **argv)
+{
     char cwd[MAX_PATH_LEN];
     if (!getcwd(cwd, sizeof(cwd)))
         return 1;
 
-    if (!package_yml_exists(cwd)) {
+    if (!package_yml_exists(cwd))
+    {
         printf(C_RED "No package.yml found. Run 'pypmc init' first." C_RESET
                      "\n");
         return 1;
     }
 
-    if (argc < 3) {
+    if (argc < 3)
+    {
         fprintf(stderr, "Usage: pypmc uninstall <package> [package...]\n");
         return 1;
     }
 
     int ret = 0;
-    for (int i = 2; i < argc; i++) {
+    for (int i = 2; i < argc; i++)
+    {
         if (uninstall_package(cwd, argv[i]) != 0)
             ret = 1;
     }
     return ret;
 }
 
-static int cmd_list(void) {
+static int cmd_list(void)
+{
     char cwd[MAX_PATH_LEN];
     if (!getcwd(cwd, sizeof(cwd)))
         return 1;
@@ -274,8 +298,10 @@ static int cmd_list(void) {
     return 0;
 }
 
-static int cmd_run(int argc, char **argv) {
-    if (argc < 3) {
+static int cmd_run(int argc, char **argv)
+{
+    if (argc < 3)
+    {
         fprintf(stderr, "Usage: pypmc run <script>\n");
         return 1;
     }
@@ -284,7 +310,8 @@ static int cmd_run(int argc, char **argv) {
     if (!getcwd(cwd, sizeof(cwd)))
         return 1;
 
-    if (!package_yml_exists(cwd)) {
+    if (!package_yml_exists(cwd))
+    {
         printf(C_RED "No package.yml found. Run 'pypmc init' first." C_RESET
                      "\n");
         return 1;
@@ -294,25 +321,29 @@ static int cmd_run(int argc, char **argv) {
     return run_script(cwd, argv[2]);
 }
 
-static int cmd_update(int argc, char **argv) {
+static int cmd_update(int argc, char **argv)
+{
     char cwd[MAX_PATH_LEN];
     if (!getcwd(cwd, sizeof(cwd)))
         return 1;
 
-    if (argc < 3) {
+    if (argc < 3)
+    {
         /* no packages specified — update all */
         return update_all(cwd);
     }
 
     int ret = 0;
-    for (int i = 2; i < argc; i++) {
+    for (int i = 2; i < argc; i++)
+    {
         if (update_package(cwd, argv[i]) != 0)
             ret = 1;
     }
     return ret;
 }
 
-static int cmd_outdated(void) {
+static int cmd_outdated(void)
+{
     char cwd[MAX_PATH_LEN];
     if (!getcwd(cwd, sizeof(cwd)))
         return 1;
@@ -320,8 +351,10 @@ static int cmd_outdated(void) {
     return 0;
 }
 
-static int cmd_completions(int argc, char **argv) {
-    if (argc < 3) {
+static int cmd_completions(int argc, char **argv)
+{
+    if (argc < 3)
+    {
         fprintf(stderr, "Usage: pypmc completions <bash|zsh|fish>\n");
         return 1;
     }
@@ -333,7 +366,8 @@ static int cmd_completions(int argc, char **argv) {
         generate_completion_zsh();
     else if (strcmp(shell, "fish") == 0)
         generate_completion_fish();
-    else {
+    else
+    {
         fprintf(stderr, "Unsupported shell: %s\n", shell);
         fprintf(stderr, "Supported: bash, zsh, fish\n");
         return 1;
@@ -341,12 +375,14 @@ static int cmd_completions(int argc, char **argv) {
     return 0;
 }
 
-static int cmd_activate(void) {
+static int cmd_activate(void)
+{
     char cwd[MAX_PATH_LEN];
     if (!getcwd(cwd, sizeof(cwd)))
         return 1;
 
-    if (!venv_exists(cwd)) {
+    if (!venv_exists(cwd))
+    {
         printf(C_RED "No .venv found. Run 'pypmc init' first." C_RESET "\n");
         return 1;
     }
@@ -358,24 +394,28 @@ static int cmd_activate(void) {
 
 /* ── main ────────────────────────────────────────────────────────── */
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 #ifdef _WIN32
     enable_ansi();
 #endif
 
-    if (argc < 2) {
+    if (argc < 2)
+    {
         print_usage();
         return 0;
     }
 
     const char *cmd = argv[1];
 
-    if (strcmp(cmd, "--version") == 0 || strcmp(cmd, "-V") == 0) {
+    if (strcmp(cmd, "--version") == 0 || strcmp(cmd, "-V") == 0)
+    {
         printf("pypmc %s\n", PYPMC_VERSION);
         return 0;
     }
 
-    if (strcmp(cmd, "--help") == 0 || strcmp(cmd, "-h") == 0) {
+    if (strcmp(cmd, "--help") == 0 || strcmp(cmd, "-h") == 0)
+    {
         print_usage();
         return 0;
     }

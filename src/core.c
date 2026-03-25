@@ -28,12 +28,15 @@
 /* ── helpers ─────────────────────────────────────────────────────── */
 
 static void parse_package_spec(const char *spec, char *name, size_t name_max,
-                               char *ver_spec, size_t ver_max) {
+                               char *ver_spec, size_t ver_max)
+{
     const char *separators[] = {"==", ">=", "<=", "!=", "~=", ">", "<", NULL};
 
-    for (int i = 0; separators[i]; i++) {
+    for (int i = 0; separators[i]; i++)
+    {
         const char *found = strstr(spec, separators[i]);
-        if (found) {
+        if (found)
+        {
             size_t nlen = (size_t)(found - spec);
             if (nlen >= name_max)
                 nlen = name_max - 1;
@@ -55,7 +58,8 @@ static void parse_package_spec(const char *spec, char *name, size_t name_max,
 
 static int get_installed_version(const char *project_dir,
                                  const char *package_name, char *ver_out,
-                                 size_t ver_max) {
+                                 size_t ver_max)
+{
     char args[MAX_CMD];
     snprintf(args, sizeof(args), "show %s", package_name);
 
@@ -64,14 +68,17 @@ static int get_installed_version(const char *project_dir,
         return -1;
 
     int status = run_pip_capture(project_dir, args, output, MAX_OUTPUT);
-    if (status != 0) {
+    if (status != 0)
+    {
         free(output);
         return -1;
     }
 
     char *line = strtok(output, "\n");
-    while (line) {
-        if (strncmp(line, "Version:", 8) == 0) {
+    while (line)
+    {
+        if (strncmp(line, "Version:", 8) == 0)
+        {
             char *ver = line + 8;
             while (*ver == ' ')
                 ver++;
@@ -91,18 +98,21 @@ static int get_installed_version(const char *project_dir,
     return -1;
 }
 
-static int parse_pip_json_list(const char *json, Dependency *out, int max) {
+static int parse_pip_json_list(const char *json, Dependency *out, int max)
+{
     int count = 0;
     const char *p = json;
 
-    while (count < max && (p = strstr(p, "\"name\"")) != NULL) {
+    while (count < max && (p = strstr(p, "\"name\"")) != NULL)
+    {
         p = strchr(p + 6, ':');
         if (!p)
             break;
         p++;
         while (*p == ' ')
             p++;
-        if (*p != '"') {
+        if (*p != '"')
+        {
             p++;
             continue;
         }
@@ -130,7 +140,8 @@ static int parse_pip_json_list(const char *json, Dependency *out, int max) {
         vp++;
         while (*vp == ' ')
             vp++;
-        if (*vp != '"') {
+        if (*vp != '"')
+        {
             p = vp;
             continue;
         }
@@ -151,20 +162,23 @@ static int parse_pip_json_list(const char *json, Dependency *out, int max) {
     return count;
 }
 
-static void regenerate_lockfile(const char *project_dir) {
+static void regenerate_lockfile(const char *project_dir)
+{
     char args[] = "list --format=json";
     char *output = malloc(MAX_OUTPUT);
     if (!output)
         return;
 
     int status = run_pip_capture(project_dir, args, output, MAX_OUTPUT);
-    if (status != 0) {
+    if (status != 0)
+    {
         free(output);
         return;
     }
 
     Dependency *packages = malloc(sizeof(Dependency) * MAX_DEPS);
-    if (!packages) {
+    if (!packages)
+    {
         free(output);
         return;
     }
@@ -174,12 +188,14 @@ static void regenerate_lockfile(const char *project_dir) {
 
     /* filter out internal tools */
     Dependency *filtered = malloc(sizeof(Dependency) * MAX_DEPS);
-    if (!filtered) {
+    if (!filtered)
+    {
         free(packages);
         return;
     }
     int fcount = 0;
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++)
+    {
         if (strcmp(packages[i].name, "pip") == 0 ||
             strcmp(packages[i].name, "setuptools") == 0 ||
             strcmp(packages[i].name, "wheel") == 0)
@@ -194,7 +210,8 @@ static void regenerate_lockfile(const char *project_dir) {
 
 static void collect_requires(const char *project_dir,
                              const char *package_name, char required[][MAX_NAME],
-                             int *req_count, int max_req) {
+                             int *req_count, int max_req)
+{
     char args[MAX_CMD];
     snprintf(args, sizeof(args), "show %s", package_name);
 
@@ -203,25 +220,30 @@ static void collect_requires(const char *project_dir,
         return;
 
     int status = run_pip_capture(project_dir, args, output, MAX_OUTPUT);
-    if (status != 0) {
+    if (status != 0)
+    {
         free(output);
         return;
     }
 
     char *line = strtok(output, "\n");
-    while (line) {
-        if (strncmp(line, "Requires:", 9) == 0) {
+    while (line)
+    {
+        if (strncmp(line, "Requires:", 9) == 0)
+        {
             char *reqs = line + 9;
             while (*reqs == ' ')
                 reqs++;
-            if (*reqs == '\0' || *reqs == '\r') {
+            if (*reqs == '\0' || *reqs == '\r')
+            {
                 free(output);
                 return;
             }
 
             /* parse comma-separated list */
             char *tok = strtok(reqs, ",");
-            while (tok) {
+            while (tok)
+            {
                 while (*tok == ' ')
                     tok++;
                 size_t tlen = strlen(tok);
@@ -229,7 +251,8 @@ static void collect_requires(const char *project_dir,
                        (tok[tlen - 1] == ' ' || tok[tlen - 1] == '\r'))
                     tok[--tlen] = '\0';
 
-                if (tlen == 0) {
+                if (tlen == 0)
+                {
                     tok = strtok(NULL, ",");
                     continue;
                 }
@@ -243,14 +266,17 @@ static void collect_requires(const char *project_dir,
 
                 /* check if already in collected */
                 int found = 0;
-                for (int i = 0; i < *req_count; i++) {
-                    if (strcmp(required[i], req_name) == 0) {
+                for (int i = 0; i < *req_count; i++)
+                {
+                    if (strcmp(required[i], req_name) == 0)
+                    {
                         found = 1;
                         break;
                     }
                 }
 
-                if (!found && *req_count < max_req) {
+                if (!found && *req_count < max_req)
+                {
                     strncpy(required[*req_count], req_name, MAX_NAME - 1);
                     required[*req_count][MAX_NAME - 1] = '\0';
                     (*req_count)++;
@@ -259,7 +285,7 @@ static void collect_requires(const char *project_dir,
                        the Requires line which is a single line. */
                     free(output);
                     collect_requires(project_dir, req_name, required, req_count,
-                                    max_req);
+                                     max_req);
                     return;
                 }
 
@@ -273,7 +299,8 @@ static void collect_requires(const char *project_dir,
     free(output);
 }
 
-static void cleanup_orphans(const char *project_dir) {
+static void cleanup_orphans(const char *project_dir)
+{
     Dependency all_deps[MAX_DEPS];
     int dep_count = 0;
     if (get_all_dependencies(project_dir, all_deps, &dep_count) != 0)
@@ -287,7 +314,8 @@ static void cleanup_orphans(const char *project_dir) {
         return;
     int req_count = 0;
 
-    for (int i = 0; i < dep_count; i++) {
+    for (int i = 0; i < dep_count; i++)
+    {
         char lower_name[MAX_NAME];
         strncpy(lower_name, all_deps[i].name, MAX_NAME - 1);
         lower_name[MAX_NAME - 1] = '\0';
@@ -296,13 +324,16 @@ static void cleanup_orphans(const char *project_dir) {
 
         /* add direct dep */
         int found = 0;
-        for (int j = 0; j < req_count; j++) {
-            if (strcmp(required[j], lower_name) == 0) {
+        for (int j = 0; j < req_count; j++)
+        {
+            if (strcmp(required[j], lower_name) == 0)
+            {
                 found = 1;
                 break;
             }
         }
-        if (!found && req_count < MAX_DEPS) {
+        if (!found && req_count < MAX_DEPS)
+        {
             strncpy(required[req_count], lower_name, MAX_NAME - 1);
             required[req_count][MAX_NAME - 1] = '\0';
             req_count++;
@@ -315,20 +346,23 @@ static void cleanup_orphans(const char *project_dir) {
     /* get all installed */
     char args[] = "list --format=json";
     char *output = malloc(MAX_OUTPUT);
-    if (!output) {
+    if (!output)
+    {
         free(required);
         return;
     }
 
     int status = run_pip_capture(project_dir, args, output, MAX_OUTPUT);
-    if (status != 0) {
+    if (status != 0)
+    {
         free(output);
         free(required);
         return;
     }
 
     Dependency *installed = malloc(sizeof(Dependency) * MAX_DEPS);
-    if (!installed) {
+    if (!installed)
+    {
         free(output);
         free(required);
         return;
@@ -340,21 +374,25 @@ static void cleanup_orphans(const char *project_dir) {
     char orphan_list[MAX_CMD] = {0};
     int has_orphans = 0;
 
-    for (int i = 0; i < inst_count; i++) {
+    for (int i = 0; i < inst_count; i++)
+    {
         if (strcmp(installed[i].name, "pip") == 0 ||
             strcmp(installed[i].name, "setuptools") == 0 ||
             strcmp(installed[i].name, "wheel") == 0)
             continue;
 
         int is_required = 0;
-        for (int j = 0; j < req_count; j++) {
-            if (strcmp(installed[i].name, required[j]) == 0) {
+        for (int j = 0; j < req_count; j++)
+        {
+            if (strcmp(installed[i].name, required[j]) == 0)
+            {
                 is_required = 1;
                 break;
             }
         }
 
-        if (!is_required) {
+        if (!is_required)
+        {
             if (has_orphans)
                 strncat(orphan_list, " ", sizeof(orphan_list) - strlen(orphan_list) - 1);
             strncat(orphan_list, installed[i].name,
@@ -363,7 +401,8 @@ static void cleanup_orphans(const char *project_dir) {
         }
     }
 
-    if (has_orphans) {
+    if (has_orphans)
+    {
         printf("Removing orphaned packages: %s\n", orphan_list);
         char pip_args[MAX_CMD];
         snprintf(pip_args, sizeof(pip_args), "uninstall -y %s", orphan_list);
@@ -379,7 +418,8 @@ static void cleanup_orphans(const char *project_dir) {
 void init_project(const char *project_dir, const char *name,
                   const char *version, const char *description,
                   const char *author, const char *license_str,
-                  const char *python) {
+                  const char *python)
+{
     PackageYml pkg;
     init_default_package_yml(&pkg, name, version, description, author,
                              license_str, python);
@@ -392,9 +432,11 @@ void init_project(const char *project_dir, const char *name,
     /* write main.py if it doesn't exist */
     char main_py[MAX_PATH_LEN];
     snprintf(main_py, sizeof(main_py), "%s/main.py", project_dir);
-    if (access(main_py, F_OK) != 0) {
+    if (access(main_py, F_OK) != 0)
+    {
         FILE *f = fopen(main_py, "w");
-        if (f) {
+        if (f)
+        {
             fprintf(f, "\"\"\"\n%s - %s\n\"\"\"\n\n\n", name,
                     (description && *description) ? description
                                                   : "A Python project managed by pypmc.");
@@ -411,9 +453,11 @@ void init_project(const char *project_dir, const char *name,
     /* write .gitignore if it doesn't exist */
     char gitignore[MAX_PATH_LEN];
     snprintf(gitignore, sizeof(gitignore), "%s/.gitignore", project_dir);
-    if (access(gitignore, F_OK) != 0) {
+    if (access(gitignore, F_OK) != 0)
+    {
         FILE *f = fopen(gitignore, "w");
-        if (f) {
+        if (f)
+        {
             fprintf(f, ".venv/\n__pycache__/\n*.pyc\n*.egg-info/\ndist/\n"
                        "build/\n");
             fclose(f);
@@ -423,7 +467,8 @@ void init_project(const char *project_dir, const char *name,
 }
 
 int install_package(const char *project_dir, const char *package_spec,
-                    int dev) {
+                    int dev)
+{
     ensure_venv(project_dir);
 
     char name[MAX_NAME], ver_spec[MAX_VER];
@@ -441,7 +486,8 @@ int install_package(const char *project_dir, const char *package_spec,
     char args[MAX_CMD];
     snprintf(args, sizeof(args), "install %s", pip_spec);
     int status = run_pip(project_dir, args);
-    if (status != 0) {
+    if (status != 0)
+    {
         printf(C_RED "Failed to install %s" C_RESET "\n", pip_spec);
         return -1;
     }
@@ -464,8 +510,10 @@ int install_package(const char *project_dir, const char *package_spec,
     return 0;
 }
 
-int install_all(const char *project_dir) {
-    if (!package_yml_exists(project_dir)) {
+int install_all(const char *project_dir)
+{
+    if (!package_yml_exists(project_dir))
+    {
         printf(C_RED "No package.yml found. Run 'pypmc init' first." C_RESET
                      "\n");
         return -1;
@@ -477,7 +525,8 @@ int install_all(const char *project_dir) {
     int dep_count = 0;
     get_all_dependencies(project_dir, all_deps, &dep_count);
 
-    if (dep_count == 0) {
+    if (dep_count == 0)
+    {
         printf("No dependencies to install.\n");
         return 0;
     }
@@ -490,17 +539,22 @@ int install_all(const char *project_dir) {
 
     /* build pip install args */
     char args[MAX_CMD] = "install";
-    if (use_lock) {
+    if (use_lock)
+    {
         printf("Installing from package-lock.yml...\n");
-        for (int i = 0; i < lock.package_count; i++) {
+        for (int i = 0; i < lock.package_count; i++)
+        {
             char spec[MAX_STR];
             snprintf(spec, sizeof(spec), " %s==%s", lock.packages[i].name,
                      lock.packages[i].version);
             strncat(args, spec, sizeof(args) - strlen(args) - 1);
         }
-    } else {
+    }
+    else
+    {
         printf("Installing from package.yml...\n");
-        for (int i = 0; i < dep_count; i++) {
+        for (int i = 0; i < dep_count; i++)
+        {
             char spec[MAX_STR];
             snprintf(spec, sizeof(spec), " %s%s", all_deps[i].name,
                      all_deps[i].version);
@@ -509,7 +563,8 @@ int install_all(const char *project_dir) {
     }
 
     int status = run_pip(project_dir, args);
-    if (status != 0) {
+    if (status != 0)
+    {
         printf(C_RED "Some packages failed to install." C_RESET "\n");
         return -1;
     }
@@ -519,7 +574,8 @@ int install_all(const char *project_dir) {
     return 0;
 }
 
-int uninstall_package(const char *project_dir, const char *package_name) {
+int uninstall_package(const char *project_dir, const char *package_name)
+{
     ensure_venv(project_dir);
 
     printf("Uninstalling %s...\n", package_name);
@@ -527,7 +583,8 @@ int uninstall_package(const char *project_dir, const char *package_name) {
     char args[MAX_CMD];
     snprintf(args, sizeof(args), "uninstall -y %s", package_name);
     int status = run_pip(project_dir, args);
-    if (status != 0) {
+    if (status != 0)
+    {
         printf(C_RED "Failed to uninstall %s" C_RESET "\n", package_name);
         return -1;
     }
@@ -543,8 +600,10 @@ int uninstall_package(const char *project_dir, const char *package_name) {
     return 0;
 }
 
-void list_packages(const char *project_dir) {
-    if (!package_yml_exists(project_dir)) {
+void list_packages(const char *project_dir)
+{
+    if (!package_yml_exists(project_dir))
+    {
         printf(C_RED "No package.yml found." C_RESET "\n");
         return;
     }
@@ -553,9 +612,11 @@ void list_packages(const char *project_dir) {
     if (read_package_yml(project_dir, &pkg) != 0)
         return;
 
-    if (pkg.dep_count > 0) {
+    if (pkg.dep_count > 0)
+    {
         printf(C_CYAN "dependencies:" C_RESET "\n");
-        for (int i = 0; i < pkg.dep_count; i++) {
+        for (int i = 0; i < pkg.dep_count; i++)
+        {
             char installed[MAX_VER] = {0};
             int has_ver = get_installed_version(project_dir, pkg.deps[i].name,
                                                 installed, sizeof(installed));
@@ -568,9 +629,11 @@ void list_packages(const char *project_dir) {
         }
     }
 
-    if (pkg.dev_dep_count > 0) {
+    if (pkg.dev_dep_count > 0)
+    {
         printf(C_CYAN "dev_dependencies:" C_RESET "\n");
-        for (int i = 0; i < pkg.dev_dep_count; i++) {
+        for (int i = 0; i < pkg.dev_dep_count; i++)
+        {
             char installed[MAX_VER] = {0};
             int has_ver =
                 get_installed_version(project_dir, pkg.dev_deps[i].name,
@@ -590,8 +653,10 @@ void list_packages(const char *project_dir) {
 
 /* ── update ───────────────────────────────────────────────────────── */
 
-int update_package(const char *project_dir, const char *package_name) {
-    if (!package_yml_exists(project_dir)) {
+int update_package(const char *project_dir, const char *package_name)
+{
+    if (!package_yml_exists(project_dir))
+    {
         printf(C_RED "No package.yml found. Run 'pypmc init' first." C_RESET
                      "\n");
         return -1;
@@ -603,7 +668,8 @@ int update_package(const char *project_dir, const char *package_name) {
     char args[MAX_CMD];
     snprintf(args, sizeof(args), "install --upgrade %s", package_name);
     int status = run_pip(project_dir, args);
-    if (status != 0) {
+    if (status != 0)
+    {
         printf(C_RED "Failed to update %s" C_RESET "\n", package_name);
         return -1;
     }
@@ -611,16 +677,20 @@ int update_package(const char *project_dir, const char *package_name) {
     /* get new version and update package.yml */
     char new_ver[MAX_VER] = {0};
     if (get_installed_version(project_dir, package_name, new_ver,
-                              sizeof(new_ver)) == 0) {
+                              sizeof(new_ver)) == 0)
+    {
         char ver_str[MAX_VER];
         snprintf(ver_str, sizeof(ver_str), "==%s", new_ver);
 
         /* check if it's a dev dep or regular dep */
         PackageYml pkg;
         int is_dev = 0;
-        if (read_package_yml(project_dir, &pkg) == 0) {
-            for (int i = 0; i < pkg.dev_dep_count; i++) {
-                if (strcmp(pkg.dev_deps[i].name, package_name) == 0) {
+        if (read_package_yml(project_dir, &pkg) == 0)
+        {
+            for (int i = 0; i < pkg.dev_dep_count; i++)
+            {
+                if (strcmp(pkg.dev_deps[i].name, package_name) == 0)
+                {
                     is_dev = 1;
                     break;
                 }
@@ -635,8 +705,10 @@ int update_package(const char *project_dir, const char *package_name) {
     return 0;
 }
 
-int update_all(const char *project_dir) {
-    if (!package_yml_exists(project_dir)) {
+int update_all(const char *project_dir)
+{
+    if (!package_yml_exists(project_dir))
+    {
         printf(C_RED "No package.yml found. Run 'pypmc init' first." C_RESET
                      "\n");
         return -1;
@@ -647,14 +719,16 @@ int update_all(const char *project_dir) {
     int dep_count = 0;
     get_all_dependencies(project_dir, all_deps, &dep_count);
 
-    if (dep_count == 0) {
+    if (dep_count == 0)
+    {
         printf("No dependencies to update.\n");
         return 0;
     }
 
     /* build pip install --upgrade with all packages */
     char args[MAX_CMD] = "install --upgrade";
-    for (int i = 0; i < dep_count; i++) {
+    for (int i = 0; i < dep_count; i++)
+    {
         char spec[MAX_STR];
         snprintf(spec, sizeof(spec), " %s", all_deps[i].name);
         strncat(args, spec, sizeof(args) - strlen(args) - 1);
@@ -662,25 +736,31 @@ int update_all(const char *project_dir) {
 
     printf("Updating all dependencies...\n");
     int status = run_pip(project_dir, args);
-    if (status != 0) {
+    if (status != 0)
+    {
         printf(C_RED "Some packages failed to update." C_RESET "\n");
         return -1;
     }
 
     /* update all versions in package.yml */
     PackageYml pkg;
-    if (read_package_yml(project_dir, &pkg) == 0) {
-        for (int i = 0; i < pkg.dep_count; i++) {
+    if (read_package_yml(project_dir, &pkg) == 0)
+    {
+        for (int i = 0; i < pkg.dep_count; i++)
+        {
             char new_ver[MAX_VER] = {0};
             if (get_installed_version(project_dir, pkg.deps[i].name, new_ver,
-                                      sizeof(new_ver)) == 0) {
+                                      sizeof(new_ver)) == 0)
+            {
                 snprintf(pkg.deps[i].version, MAX_VER, "==%s", new_ver);
             }
         }
-        for (int i = 0; i < pkg.dev_dep_count; i++) {
+        for (int i = 0; i < pkg.dev_dep_count; i++)
+        {
             char new_ver[MAX_VER] = {0};
             if (get_installed_version(project_dir, pkg.dev_deps[i].name,
-                                      new_ver, sizeof(new_ver)) == 0) {
+                                      new_ver, sizeof(new_ver)) == 0)
+            {
                 snprintf(pkg.dev_deps[i].version, MAX_VER, "==%s", new_ver);
             }
         }
@@ -694,8 +774,10 @@ int update_all(const char *project_dir) {
 
 /* ── outdated ─────────────────────────────────────────────────────── */
 
-void outdated_packages(const char *project_dir) {
-    if (!package_yml_exists(project_dir)) {
+void outdated_packages(const char *project_dir)
+{
+    if (!package_yml_exists(project_dir))
+    {
         printf(C_RED "No package.yml found." C_RESET "\n");
         return;
     }
@@ -708,11 +790,13 @@ void outdated_packages(const char *project_dir) {
     int status =
         run_pip_capture(project_dir, "list --outdated --format=json", output,
                         MAX_OUTPUT);
-    if (status != 0) {
+    if (status != 0)
+    {
         /* fallback: try columns format */
         status = run_pip_capture(project_dir, "list --outdated", output,
                                  MAX_OUTPUT);
-        if (status != 0) {
+        if (status != 0)
+        {
             printf(C_RED "Failed to check for outdated packages." C_RESET
                          "\n");
             free(output);
@@ -737,59 +821,87 @@ void outdated_packages(const char *project_dir) {
     printf("%-25s %-15s %-15s %s\n", "Package", "Current", "Latest", "Type");
     printf("%-25s %-15s %-15s %s\n", "-------", "-------", "------", "----");
 
-    while ((p = strstr(p, "\"name\"")) != NULL) {
+    while ((p = strstr(p, "\"name\"")) != NULL)
+    {
         char name[MAX_NAME] = {0}, cur_ver[MAX_VER] = {0},
              latest[MAX_VER] = {0};
 
         /* parse name */
         p = strchr(p + 6, ':');
-        if (!p) break;
+        if (!p)
+            break;
         p++;
-        while (*p == ' ') p++;
-        if (*p != '"') { p++; continue; }
+        while (*p == ' ')
+            p++;
+        if (*p != '"')
+        {
+            p++;
+            continue;
+        }
         p++;
         const char *end = strchr(p, '"');
-        if (!end) break;
+        if (!end)
+            break;
         size_t len = (size_t)(end - p);
-        if (len >= MAX_NAME) len = MAX_NAME - 1;
+        if (len >= MAX_NAME)
+            len = MAX_NAME - 1;
         strncpy(name, p, len);
         p = end + 1;
 
         /* parse version */
         const char *vp = strstr(p, "\"version\"");
-        if (!vp) break;
+        if (!vp)
+            break;
         vp = strchr(vp + 9, ':');
-        if (!vp) break;
+        if (!vp)
+            break;
         vp++;
-        while (*vp == ' ') vp++;
-        if (*vp != '"') { p = vp; continue; }
+        while (*vp == ' ')
+            vp++;
+        if (*vp != '"')
+        {
+            p = vp;
+            continue;
+        }
         vp++;
         end = strchr(vp, '"');
-        if (!end) break;
+        if (!end)
+            break;
         len = (size_t)(end - vp);
-        if (len >= MAX_VER) len = MAX_VER - 1;
+        if (len >= MAX_VER)
+            len = MAX_VER - 1;
         strncpy(cur_ver, vp, len);
         p = end + 1;
 
         /* parse latest_version */
         const char *lp = strstr(p, "\"latest_version\"");
-        if (!lp) break;
+        if (!lp)
+            break;
         lp = strchr(lp + 16, ':');
-        if (!lp) break;
+        if (!lp)
+            break;
         lp++;
-        while (*lp == ' ') lp++;
-        if (*lp != '"') { p = lp; continue; }
+        while (*lp == ' ')
+            lp++;
+        if (*lp != '"')
+        {
+            p = lp;
+            continue;
+        }
         lp++;
         end = strchr(lp, '"');
-        if (!end) break;
+        if (!end)
+            break;
         len = (size_t)(end - lp);
-        if (len >= MAX_VER) len = MAX_VER - 1;
+        if (len >= MAX_VER)
+            len = MAX_VER - 1;
         strncpy(latest, lp, len);
         p = end + 1;
 
         /* check if it's a direct dependency */
         const char *dep_type = "transitive";
-        for (int i = 0; i < dep_count; i++) {
+        for (int i = 0; i < dep_count; i++)
+        {
             /* case-insensitive compare */
             char lower_dep[MAX_NAME], lower_name[MAX_NAME];
             strncpy(lower_dep, all_deps[i].name, MAX_NAME - 1);
@@ -800,7 +912,8 @@ void outdated_packages(const char *project_dir) {
                 lower_dep[j] = (char)tolower(lower_dep[j]);
             for (size_t j = 0; lower_name[j]; j++)
                 lower_name[j] = (char)tolower(lower_name[j]);
-            if (strcmp(lower_dep, lower_name) == 0) {
+            if (strcmp(lower_dep, lower_name) == 0)
+            {
                 dep_type = C_YELLOW "direct" C_RESET;
                 break;
             }
@@ -820,7 +933,8 @@ void outdated_packages(const char *project_dir) {
 
 /* ── shell completions ────────────────────────────────────────────── */
 
-void generate_completion_bash(void) {
+void generate_completion_bash(void)
+{
     printf("# pypmc bash completion\n"
            "# Add to ~/.bashrc: eval \"$(pypmc completions bash)\"\n"
            "_pypmc() {\n"
@@ -874,7 +988,8 @@ void generate_completion_bash(void) {
            "complete -F _pypmc pypmc\n");
 }
 
-void generate_completion_zsh(void) {
+void generate_completion_zsh(void)
+{
     printf("#compdef pypmc\n"
            "# pypmc zsh completion\n"
            "# Add to ~/.zshrc: eval \"$(pypmc completions zsh)\"\n"
@@ -940,7 +1055,8 @@ void generate_completion_zsh(void) {
            "_pypmc \"$@\"\n");
 }
 
-void generate_completion_fish(void) {
+void generate_completion_fish(void)
+{
     printf("# pypmc fish completion\n"
            "# Add to fish: pypmc completions fish | source\n"
            "# Or save to: ~/.config/fish/completions/pypmc.fish\n"
@@ -999,28 +1115,36 @@ void generate_completion_fish(void) {
 
 /* ── run_script ───────────────────────────────────────────────────── */
 
-int run_script(const char *project_dir, const char *script_name) {
+int run_script(const char *project_dir, const char *script_name)
+{
     PackageYml pkg;
     if (read_package_yml(project_dir, &pkg) != 0)
         return 1;
 
     /* find script */
     const char *command = NULL;
-    for (int i = 0; i < pkg.script_count; i++) {
-        if (strcmp(pkg.scripts[i].name, script_name) == 0) {
+    for (int i = 0; i < pkg.script_count; i++)
+    {
+        if (strcmp(pkg.scripts[i].name, script_name) == 0)
+        {
             command = pkg.scripts[i].command;
             break;
         }
     }
 
-    if (!command) {
+    if (!command)
+    {
         printf(C_RED "Script '%s' not found in package.yml" C_RESET "\n",
                script_name);
         printf("Available scripts: ");
-        if (pkg.script_count == 0) {
+        if (pkg.script_count == 0)
+        {
             printf("none\n");
-        } else {
-            for (int i = 0; i < pkg.script_count; i++) {
+        }
+        else
+        {
+            for (int i = 0; i < pkg.script_count; i++)
+            {
                 if (i > 0)
                     printf(", ");
                 printf("%s", pkg.scripts[i].name);

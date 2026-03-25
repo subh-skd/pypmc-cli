@@ -10,17 +10,20 @@
 #define MAX_CMD 8192
 #define MAX_OUTPUT (1024 * 256)
 
-typedef struct {
+typedef struct
+{
     char name[MAX_NAME];
     char version[MAX_VER];
 } Dependency;
 
-typedef struct {
+typedef struct
+{
     char name[MAX_NAME];
     char command[MAX_STR];
 } Script;
 
-typedef struct {
+typedef struct
+{
     char name[MAX_NAME];
     char version[MAX_VER];
     char description[MAX_STR];
@@ -38,7 +41,8 @@ typedef struct {
     int dev_dep_count;
 } PackageYml;
 
-typedef struct {
+typedef struct
+{
     int lockfile_version;
     Dependency packages[MAX_DEPS];
     int package_count;
