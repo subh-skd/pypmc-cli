@@ -26,19 +26,21 @@
 curl -fsSL https://raw.githubusercontent.com/subh-skd/pypmc-cli/main/install.sh | bash
 ```
 
-**Windows (PowerShell):**
+**Windows (PowerShell) — run as Administrator:**
 
 ```powershell
 irm https://raw.githubusercontent.com/subh-skd/pypmc-cli/main/install.ps1 | iex
 ```
 
-**Windows (CMD):**
+**Windows (CMD) — run as Administrator:**
 
 ```cmd
 curl -fsSL https://raw.githubusercontent.com/subh-skd/pypmc-cli/main/install.bat -o %TEMP%\install-pypmc.bat && %TEMP%\install-pypmc.bat
 ```
 
-The installer downloads the latest release binary, places it in the correct location, and adds it to your PATH automatically.
+> **Note:** On Windows, the installer requires **Administrator privileges** to install to `C:\Program Files\pypmc` and add it to the system PATH. Right-click your terminal and select **"Run as administrator"** before running the command.
+
+The installer downloads the latest release binary, places it in the correct location, and adds it to your system PATH automatically.
 
 ### Post-install: Adding to PATH
 
@@ -48,7 +50,7 @@ The install scripts add pypmc to your PATH automatically. If `pypmc` is not reco
 |---|---|---|
 | Linux | `/usr/local/bin/pypmc` | Usually already in PATH |
 | macOS | `/usr/local/bin/pypmc` | Usually already in PATH |
-| Windows | `%LOCALAPPDATA%\pypmc\pypmc.exe` | `%LOCALAPPDATA%\pypmc` |
+| Windows | `%ProgramFiles%\pypmc\pypmc.exe` | `%ProgramFiles%\pypmc` |
 
 <details>
 <summary><b>Linux / macOS — manual PATH setup</b></summary>
@@ -72,18 +74,18 @@ fish_add_path /usr/local/bin
 **Option 1: Via GUI**
 1. Press `Win + R`, type `sysdm.cpl`, press Enter
 2. Go to **Advanced** tab > **Environment Variables**
-3. Under **User variables**, select `Path` and click **Edit**
-4. Click **New** and add: `%LOCALAPPDATA%\pypmc`
+3. Under **System variables**, select `Path` and click **Edit**
+4. Click **New** and add: `%ProgramFiles%\pypmc`
 5. Click OK, then restart your terminal
 
 **Option 2: Via CMD (run as Administrator)**
 ```cmd
-setx Path "%Path%;%LOCALAPPDATA%\pypmc"
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /t REG_EXPAND_SZ /d "%Path%;%ProgramFiles%\pypmc" /f
 ```
 
-**Option 3: Via PowerShell**
+**Option 3: Via PowerShell (run as Administrator)**
 ```powershell
-[Environment]::SetEnvironmentVariable("Path", "$([Environment]::GetEnvironmentVariable('Path', 'User'));$env:LOCALAPPDATA\pypmc", "User")
+[Environment]::SetEnvironmentVariable("Path", "$([Environment]::GetEnvironmentVariable('Path', 'Machine'));$env:ProgramFiles\pypmc", "Machine")
 ```
 
 </details>
@@ -105,10 +107,10 @@ Download the latest binary from the [Releases](../../releases) page:
 chmod +x pypmc-linux-amd64
 sudo mv pypmc-linux-amd64 /usr/local/bin/pypmc
 
-# Windows (CMD) — download and install manually
-mkdir %LOCALAPPDATA%\pypmc
-move pypmc-windows-amd64.exe %LOCALAPPDATA%\pypmc\pypmc.exe
-setx Path "%Path%;%LOCALAPPDATA%\pypmc"
+# Windows (CMD, run as Administrator) — download and install manually
+mkdir "%ProgramFiles%\pypmc"
+move pypmc-windows-amd64.exe "%ProgramFiles%\pypmc\pypmc.exe"
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /t REG_EXPAND_SZ /d "%Path%;%ProgramFiles%\pypmc" /f
 ```
 
 ### Build from source
