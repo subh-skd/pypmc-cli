@@ -72,7 +72,7 @@ if %errorlevel% neq 0 (
     ) else (
         reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /t REG_EXPAND_SZ /d "%INSTALL_DIR%" /f >nul 2>&1
     )
-    if %errorlevel% neq 0 (
+    if !errorlevel! neq 0 (
         echo Error: Failed to update system PATH. Please run this script as Administrator.
         goto :fail
     )
