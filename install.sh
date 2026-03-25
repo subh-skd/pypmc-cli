@@ -23,10 +23,11 @@ case "$OS" in
 esac
 
 case "$ARCH" in
-    x86_64|amd64) ARCH_SUFFIX="amd64" ;;
+    x86_64|amd64)  ARCH_SUFFIX="amd64" ;;
+    aarch64|arm64) ARCH_SUFFIX="arm64" ;;
     *)
         echo "Error: Unsupported architecture: $ARCH"
-        echo "pypmc currently provides pre-built binaries for x86_64 only."
+        echo "pypmc provides pre-built binaries for x86_64 and arm64."
         exit 1
         ;;
 esac
@@ -82,16 +83,28 @@ fi
 
 # ── verify ───────────────────────────────────────────────────────────
 
+echo ""
 if command -v "$BIN_NAME" &>/dev/null; then
-    echo ""
     echo "pypmc installed successfully!"
     "$BIN_NAME" --version
-    echo ""
-    echo "Get started:"
-    echo "  mkdir my-project && cd my-project"
-    echo "  pypmc init"
 else
-    echo ""
     echo "pypmc was installed to ${INSTALL_DIR}/${BIN_NAME}"
-    echo "Make sure ${INSTALL_DIR} is in your PATH."
+fi
+
+echo ""
+echo "Get started:"
+echo "  mkdir my-project && cd my-project"
+echo "  pypmc init"
+
+# Show PATH help if not found in PATH
+if ! command -v "$BIN_NAME" &>/dev/null; then
+    echo ""
+    echo "NOTE: ${INSTALL_DIR} is not in your PATH."
+    echo "Add it by running:"
+    SHELL_NAME="$(basename "${SHELL:-/bin/bash}")"
+    case "$SHELL_NAME" in
+        zsh)  echo "  echo 'export PATH=\"${INSTALL_DIR}:\$PATH\"' >> ~/.zshrc && source ~/.zshrc" ;;
+        fish) echo "  fish_add_path ${INSTALL_DIR}" ;;
+        *)    echo "  echo 'export PATH=\"${INSTALL_DIR}:\$PATH\"' >> ~/.bashrc && source ~/.bashrc" ;;
+    esac
 fi

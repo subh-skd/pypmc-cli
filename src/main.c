@@ -101,9 +101,13 @@ static void print_usage(void) {
     printf("  install [packages..]  Install packages (or all from "
            "package.yml)\n");
     printf("  uninstall <packages>  Uninstall packages\n");
+    printf("  update [packages..]   Update packages to latest version\n");
+    printf("  outdated              Check for outdated packages\n");
     printf("  list                  List project dependencies\n");
     printf("  run <script>          Run a script from package.yml\n");
     printf("  activate              Show venv activation command\n");
+    printf("  completions <shell>   Generate shell completions "
+           "(bash/zsh/fish)\n");
     printf("  i [packages..]       Alias for install\n");
     printf("  rm <packages>        Alias for uninstall\n\n");
     printf("Options:\n");
@@ -290,6 +294,53 @@ static int cmd_run(int argc, char **argv) {
     return run_script(cwd, argv[2]);
 }
 
+static int cmd_update(int argc, char **argv) {
+    char cwd[MAX_PATH_LEN];
+    if (!getcwd(cwd, sizeof(cwd)))
+        return 1;
+
+    if (argc < 3) {
+        /* no packages specified — update all */
+        return update_all(cwd);
+    }
+
+    int ret = 0;
+    for (int i = 2; i < argc; i++) {
+        if (update_package(cwd, argv[i]) != 0)
+            ret = 1;
+    }
+    return ret;
+}
+
+static int cmd_outdated(void) {
+    char cwd[MAX_PATH_LEN];
+    if (!getcwd(cwd, sizeof(cwd)))
+        return 1;
+    outdated_packages(cwd);
+    return 0;
+}
+
+static int cmd_completions(int argc, char **argv) {
+    if (argc < 3) {
+        fprintf(stderr, "Usage: pypmc completions <bash|zsh|fish>\n");
+        return 1;
+    }
+
+    const char *shell = argv[2];
+    if (strcmp(shell, "bash") == 0)
+        generate_completion_bash();
+    else if (strcmp(shell, "zsh") == 0)
+        generate_completion_zsh();
+    else if (strcmp(shell, "fish") == 0)
+        generate_completion_fish();
+    else {
+        fprintf(stderr, "Unsupported shell: %s\n", shell);
+        fprintf(stderr, "Supported: bash, zsh, fish\n");
+        return 1;
+    }
+    return 0;
+}
+
 static int cmd_activate(void) {
     char cwd[MAX_PATH_LEN];
     if (!getcwd(cwd, sizeof(cwd)))
@@ -344,8 +395,17 @@ int main(int argc, char **argv) {
     if (strcmp(cmd, "run") == 0)
         return cmd_run(argc, argv);
 
+    if (strcmp(cmd, "update") == 0)
+        return cmd_update(argc, argv);
+
+    if (strcmp(cmd, "outdated") == 0)
+        return cmd_outdated();
+
     if (strcmp(cmd, "activate") == 0)
         return cmd_activate();
+
+    if (strcmp(cmd, "completions") == 0)
+        return cmd_completions(argc, argv);
 
     fprintf(stderr, "Unknown command: %s\n", cmd);
     fprintf(stderr, "Run 'pypmc --help' for usage.\n");

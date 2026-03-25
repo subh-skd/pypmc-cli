@@ -8,6 +8,8 @@
 - **`pypmc install <pkg>`** — Install a package and save it to `package.yml` (like `npm install`)
 - **`pypmc install`** — Install all dependencies from `package.yml` / lockfile (like `npm install`)
 - **`pypmc uninstall <pkg>`** — Remove a package and clean up orphaned transitive deps
+- **`pypmc update [pkg]`** — Update a package (or all) to the latest version
+- **`pypmc outdated`** — Check which packages have newer versions available
 - **`pypmc list`** — Show project dependencies and their installed versions
 - **`pypmc run <script>`** — Run scripts defined in `package.yml` (like `npm run`)
 - **Automatic `.venv`** — Creates and uses a virtual environment automatically
@@ -30,24 +32,83 @@ curl -fsSL https://raw.githubusercontent.com/subh-skd/pypmc-cli/main/install.sh 
 irm https://raw.githubusercontent.com/subh-skd/pypmc-cli/main/install.ps1 | iex
 ```
 
-This downloads the latest release binary for your platform and installs it to your PATH automatically.
+**Windows (CMD):**
+
+```cmd
+curl -fsSL https://raw.githubusercontent.com/subh-skd/pypmc-cli/main/install.bat -o %TEMP%\install-pypmc.bat && %TEMP%\install-pypmc.bat
+```
+
+The installer downloads the latest release binary, places it in the correct location, and adds it to your PATH automatically.
+
+### Post-install: Adding to PATH
+
+The install scripts add pypmc to your PATH automatically. If `pypmc` is not recognized after installation, **restart your terminal** and try again. If it still doesn't work, add the install location manually:
+
+| Platform | Install location | What to add to PATH |
+|---|---|---|
+| Linux | `/usr/local/bin/pypmc` | Usually already in PATH |
+| macOS | `/usr/local/bin/pypmc` | Usually already in PATH |
+| Windows | `%LOCALAPPDATA%\pypmc\pypmc.exe` | `%LOCALAPPDATA%\pypmc` |
+
+<details>
+<summary><b>Linux / macOS — manual PATH setup</b></summary>
+
+```bash
+# bash
+echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
+
+# zsh
+echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
+
+# fish
+fish_add_path /usr/local/bin
+```
+
+</details>
+
+<details>
+<summary><b>Windows — manual PATH setup</b></summary>
+
+**Option 1: Via GUI**
+1. Press `Win + R`, type `sysdm.cpl`, press Enter
+2. Go to **Advanced** tab > **Environment Variables**
+3. Under **User variables**, select `Path` and click **Edit**
+4. Click **New** and add: `%LOCALAPPDATA%\pypmc`
+5. Click OK, then restart your terminal
+
+**Option 2: Via CMD (run as Administrator)**
+```cmd
+setx Path "%Path%;%LOCALAPPDATA%\pypmc"
+```
+
+**Option 3: Via PowerShell**
+```powershell
+[Environment]::SetEnvironmentVariable("Path", "$([Environment]::GetEnvironmentVariable('Path', 'User'));$env:LOCALAPPDATA\pypmc", "User")
+```
+
+</details>
 
 ### Manual download
 
 Download the latest binary from the [Releases](../../releases) page:
 
-| Platform | Binary | Install location |
-|---|---|---|
-| Linux (x64) | `pypmc-linux-amd64` | `/usr/local/bin/pypmc` |
-| macOS (x64) | `pypmc-macos-amd64` | `/usr/local/bin/pypmc` |
-| Windows (x64) | `pypmc-windows-amd64.exe` | `%LOCALAPPDATA%\pypmc\pypmc.exe` |
+| Platform | Binary |
+|---|---|
+| Linux (x64) | `pypmc-linux-amd64` |
+| Linux (ARM64) | `pypmc-linux-arm64` |
+| macOS (x64) | `pypmc-macos-amd64` |
+| macOS (Apple Silicon) | `pypmc-macos-arm64` |
+| Windows (x64) | `pypmc-windows-amd64.exe` |
 
 ```bash
 # Linux / macOS
 chmod +x pypmc-linux-amd64
 sudo mv pypmc-linux-amd64 /usr/local/bin/pypmc
 
-# Windows — rename to pypmc.exe and add its folder to PATH
+# Windows (CMD) — download and install manually
+mkdir %LOCALAPPDATA%\pypmc
+move pypmc-windows-amd64.exe %LOCALAPPDATA%\pypmc\pypmc.exe
+setx Path "%Path%;%LOCALAPPDATA%\pypmc"
 ```
 
 ### Build from source
@@ -87,6 +148,15 @@ pypmc run test
 
 # Remove a package
 pypmc uninstall flask
+
+# Update a single package
+pypmc update requests
+
+# Update all packages
+pypmc update
+
+# Check for outdated packages
+pypmc outdated
 
 # List dependencies
 pypmc list
@@ -144,13 +214,40 @@ packages:
 2. **`pypmc install <pkg>`** installs into `.venv` via pip, records the direct dependency in `package.yml`, and snapshots all installed versions into `package-lock.yml`
 3. **`pypmc uninstall <pkg>`** removes the package, cleans up orphaned transitive deps, and updates both config files
 4. **`pypmc install`** (no args) reads `package-lock.yml` for exact versions, or falls back to `package.yml` version specs
+5. **`pypmc update [pkg]`** upgrades to latest via `pip install --upgrade` and updates `package.yml` + lockfile
+6. **`pypmc outdated`** queries PyPI via pip for newer versions and displays a table
+
+## Shell Completions
+
+pypmc supports tab-completion for bash, zsh, and fish. Completions cover commands, flags, package names from `package.yml`, and script names.
+
+**bash:**
+```bash
+eval "$(pypmc completions bash)"
+# Or add to ~/.bashrc for persistence
+echo 'eval "$(pypmc completions bash)"' >> ~/.bashrc
+```
+
+**zsh:**
+```zsh
+eval "$(pypmc completions zsh)"
+# Or add to ~/.zshrc for persistence
+echo 'eval "$(pypmc completions zsh)"' >> ~/.zshrc
+```
+
+**fish:**
+```fish
+pypmc completions fish | source
+# Or save permanently
+pypmc completions fish > ~/.config/fish/completions/pypmc.fish
+```
 
 ## Publishing
 
 This project uses GitHub Actions to automatically build cross-platform binaries. To publish:
 
 1. Push your code to GitHub
-2. Create a new Release — the workflow builds Linux, macOS, and Windows binaries and attaches them to the release
+2. Create a new Release — the workflow builds Linux (amd64/arm64), macOS (amd64/arm64), and Windows binaries and attaches them to the release
 3. Users download the binary for their platform, no compilation needed
 
 ## License

@@ -73,4 +73,12 @@ Write-Host "Get started:" -ForegroundColor Cyan
 Write-Host "  mkdir my-project; cd my-project"
 Write-Host "  pypmc init"
 Write-Host ""
-Write-Host "Note: Restart your terminal for PATH changes to take effect." -ForegroundColor Yellow
+Write-Host "NOTE: Restart your terminal for PATH changes to take effect." -ForegroundColor Yellow
+Write-Host "  Installed to : $DestPath" -ForegroundColor Yellow
+Write-Host "  Path added   : $InstallDir" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "If pypmc is not recognized after restarting, manually add to PATH:" -ForegroundColor Yellow
+Write-Host "  1. Open Settings > System > About > Advanced system settings"
+Write-Host "  2. Click Environment Variables"
+Write-Host "  3. Under User variables, edit Path and add:" -ForegroundColor Yellow
+Write-Host "     $InstallDir" -ForegroundColor Cyan

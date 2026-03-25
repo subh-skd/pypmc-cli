@@ -18,21 +18,30 @@ jobs:
         include:
           - os: ubuntu-latest
             artifact: pypmc-linux-amd64
-            cmake_extra: ""
+            cross: ""
           - os: macos-latest
             artifact: pypmc-macos-amd64
-            cmake_extra: ""
+            cross: ""
+          - os: macos-latest
+            artifact: pypmc-macos-arm64
+            cross: "-DCMAKE_OSX_ARCHITECTURES=arm64"
           - os: windows-latest
             artifact: pypmc-windows-amd64.exe
-            cmake_extra: ""
+            cross: ""
     runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install cross-compiler (Linux ARM64)
+        if: matrix.artifact == 'pypmc-linux-arm64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+
       - name: Build with CMake
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release
+          cmake -B build -DCMAKE_BUILD_TYPE=Release ${{ matrix.cross }}
           cmake --build build --config Release
 
       - name: Rename binary (Linux/macOS)
@@ -50,8 +59,35 @@ jobs:
           name: ${{ matrix.artifact }}
           path: ${{ matrix.artifact }}
 
+  build-linux-arm64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cross-compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+
+      - name: Build for ARM64
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc \
+            -DCMAKE_SYSTEM_NAME=Linux \
+            -DCMAKE_SYSTEM_PROCESSOR=aarch64
+          cmake --build build --config Release
+
+      - name: Rename binary
+        run: cp build/pypmc pypmc-linux-arm64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pypmc-linux-arm64
+          path: pypmc-linux-arm64
+
   release:
-    needs: build
+    needs: [build, build-linux-arm64]
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
 
@@ -66,5 +102,7 @@ jobs:
         with:
           files: |
             artifacts/pypmc-linux-amd64/pypmc-linux-amd64
+            artifacts/pypmc-linux-arm64/pypmc-linux-arm64
             artifacts/pypmc-macos-amd64/pypmc-macos-amd64
+            artifacts/pypmc-macos-arm64/pypmc-macos-arm64
             artifacts/pypmc-windows-amd64.exe/pypmc-windows-amd64.exe
