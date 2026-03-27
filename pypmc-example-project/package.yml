@@ -1,0 +1,11 @@
+name: pypmc-example-project
+version: 1.0.0
+description: this is an example project using pypmc
+author: subhendu
+license: MIT
+python: 3.12
+scripts:
+  start: python main.py
+  test: pytest
+dependencies: {}
+dev_dependencies: {}
