@@ -1,6 +1,6 @@
+import { CodeBlock } from "../CodeBlock";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CodeBlock } from "@/components/docs/CodeBlock";
 
 export function CmdInit() {
   return (

@@ -15,27 +15,23 @@ import {
   CmdActivate,
   CmdUninstall,
   CmdCompletions,
-} from "@/components/docs/sections/Commands";
+} from "@/docs/sections/Commands";
 import {
   BuildFromSource,
   VirtualEnvironments,
   DependencyResolution,
-} from "@/components/docs/sections/Advanced";
-import {
-  Scripts,
-  Lockfile,
-  PackageYml,
-} from "@/components/docs/sections/Configuration";
+} from "@/docs/sections/Advanced";
 import { navGroups } from "@/data";
+import { Sidebar } from "@/docs/Sidebar";
 import { Button } from "@/components/ui/button";
-import { Sidebar } from "@/components/docs/Sidebar";
 import { Separator } from "@/components/ui/separator";
+import { QuickStart } from "@/docs/sections/QuickStart";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Introduction } from "@/docs/sections/Introduction";
+import { Installation } from "@/docs/sections/Installation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { QuickStart } from "@/components/docs/sections/QuickStart";
-import { Introduction } from "@/components/docs/sections/Introduction";
-import { Installation } from "@/components/docs/sections/Installation";
 import { Menu, Moon, Sun, ExternalLink, Terminal } from "lucide-react";
+import { Scripts, Lockfile, PackageYml } from "@/docs/sections/Configuration";
 
 const allSectionIds = navGroups.flatMap((g) => g.items.map((i) => i.id));
 
@@ -84,13 +80,13 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground select-none">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
         <div className="mx-auto flex h-14 max-w-screen-2xl items-center gap-4 px-4 sm:px-6 lg:px-8">
           {/* Mobile menu */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors lg:hidden">
+            <SheetTrigger className="inline-flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors lg:hidden">
               <Menu className="size-4" />
             </SheetTrigger>
             <SheetContent side="left" className="w-72 p-0">
@@ -235,7 +231,7 @@ function App() {
                 </a>
                 . Built by{" "}
                 <a
-                  href="https://github.com/subh-skd"
+                  href="https://github.com/subhendu-kumar"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline underline-offset-4 hover:text-foreground"

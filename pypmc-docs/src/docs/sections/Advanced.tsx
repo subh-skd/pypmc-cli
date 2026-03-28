@@ -1,4 +1,4 @@
-import { CodeBlock } from "@/components/docs/CodeBlock";
+import { CodeBlock } from "../CodeBlock";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function VirtualEnvironments() {

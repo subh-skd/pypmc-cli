@@ -18,7 +18,7 @@ export function Sidebar({ activeSection, onNavigate }: SidebarProps) {
                 <button
                   onClick={() => onNavigate(item.id)}
                   className={cn(
-                    "w-full rounded-md px-2 py-1.5 text-left text-sm transition-colors",
+                    "w-full cursor-pointer rounded-md px-2 py-1.5 text-left text-sm transition-colors",
                     activeSection === item.id
                       ? "bg-primary text-primary-foreground font-medium"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",

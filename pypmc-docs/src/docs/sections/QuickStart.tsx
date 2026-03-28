@@ -1,4 +1,4 @@
-import { CodeBlock } from "@/components/docs/CodeBlock";
+import { CodeBlock } from "../CodeBlock";
 
 export function QuickStart() {
   return (
