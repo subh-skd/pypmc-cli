@@ -7,5 +7,6 @@ python: 3.12
 scripts:
   start: python main.py
   test: pytest
-dependencies: {}
+dependencies:
+  flask: '==3.1.3'
 dev_dependencies: {}
