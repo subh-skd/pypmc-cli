@@ -16,7 +16,7 @@ export function Installation() {
       <Tabs defaultValue="linux">
         <TabsList>
           <TabsTrigger value="linux">Linux / macOS</TabsTrigger>
-          <TabsTrigger value="powershell">Windows (PowerShell)</TabsTrigger>
+          <TabsTrigger value="powershell">Windows (PS)</TabsTrigger>
           <TabsTrigger value="cmd">Windows (CMD)</TabsTrigger>
         </TabsList>
         <TabsContent value="linux">
