@@ -39,4 +39,10 @@ export const navGroups: NavGroup[] = [
       { id: "build-from-source", label: "Build from Source" },
     ],
   },
+  {
+    title: "Contributing",
+    items: [
+      { id: "contributing", label: "Contributing Guide" },
+    ],
+  },
 ];

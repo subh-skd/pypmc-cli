@@ -32,6 +32,7 @@ import { Installation } from "@/docs/sections/Installation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Menu, Moon, Sun, ExternalLink, Terminal } from "lucide-react";
 import { Scripts, Lockfile, PackageYml } from "@/docs/sections/Configuration";
+import { Contributing } from "@/docs/sections/Contributing";
 
 const allSectionIds = navGroups.flatMap((g) => g.items.map((i) => i.id));
 
@@ -215,6 +216,10 @@ function App() {
             <DependencyResolution />
             <Separator />
             <BuildFromSource />
+            <Separator />
+
+            {/* Contributing */}
+            <Contributing />
 
             {/* Footer */}
             <Separator />
