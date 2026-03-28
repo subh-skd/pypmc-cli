@@ -91,9 +91,10 @@ Every push and pull request runs the `Build & Test` workflow on Ubuntu, macOS, a
 
 ### Branching
 
-Create a branch from `main` with a descriptive name:
+Create a branch from `dev` with a descriptive name:
 
 ```bash
+git checkout dev
 git checkout -b fix/lockfile-parse-error
 git checkout -b feat/add-freeze-command
 ```
@@ -121,11 +122,14 @@ docs: update installation instructions for Windows
 
 ## Submitting a Pull Request
 
+All pull requests should target the `dev` branch, **not** `main`.
+
 1. Ensure the build passes on your machine for all relevant platforms
-2. Keep your PR focused — one feature or fix per PR
-3. Describe **what** changed and **why** in the PR description
-4. Reference any related issues with `Fixes #123` or `Closes #123`
-5. Be responsive to review feedback — small iterations are welcome
+2. Open your PR against the `dev` branch
+3. Keep your PR focused — one feature or fix per PR
+4. Describe **what** changed and **why** in the PR description
+5. Reference any related issues with `Fixes #123` or `Closes #123`
+6. Be responsive to review feedback — small iterations are welcome
 
 PRs that break the CI build or introduce external dependencies will not be merged.
 
