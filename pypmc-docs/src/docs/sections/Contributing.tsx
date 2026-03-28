@@ -83,11 +83,11 @@ export function Contributing() {
         <div>
           <h3 className="text-lg font-semibold mb-3">Branching</h3>
           <p className="text-sm text-muted-foreground mb-3">
-            Create a branch from <code className="text-xs bg-muted px-1.5 py-0.5 rounded">main</code> with a descriptive name:
+            Create a branch from <code className="text-xs bg-muted px-1.5 py-0.5 rounded">dev</code> with a descriptive name:
           </p>
           <CodeBlock
             language="bash"
-            code={`git checkout -b fix/lockfile-parse-error\ngit checkout -b feat/add-freeze-command`}
+            code={`git checkout dev\ngit checkout -b fix/lockfile-parse-error\ngit checkout -b feat/add-freeze-command`}
           />
         </div>
 
@@ -121,8 +121,19 @@ export function Contributing() {
         {/* Pull Requests */}
         <div>
           <h3 className="text-lg font-semibold mb-3">Submitting a Pull Request</h3>
+          <p className="text-sm text-muted-foreground mb-3">
+            All pull requests should target the{" "}
+            <code className="text-xs bg-muted px-1.5 py-0.5 rounded">dev</code>{" "}
+            branch, <strong>not</strong>{" "}
+            <code className="text-xs bg-muted px-1.5 py-0.5 rounded">main</code>.
+          </p>
           <ol className="space-y-1.5 text-sm text-muted-foreground list-decimal list-inside">
             <li>Ensure the build passes on your machine</li>
+            <li>
+              Open your PR against the{" "}
+              <code className="text-xs bg-muted px-1.5 py-0.5 rounded">dev</code>{" "}
+              branch
+            </li>
             <li>Keep your PR focused — one feature or fix per PR</li>
             <li>Describe what changed and why in the PR description</li>
             <li>
