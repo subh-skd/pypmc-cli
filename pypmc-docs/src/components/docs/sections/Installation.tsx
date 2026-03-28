@@ -10,7 +10,9 @@ export function Installation() {
         build from source.
       </p>
 
-      <h3 className="text-lg font-semibold mb-3">One-line Install (recommended)</h3>
+      <h3 className="text-lg font-semibold mb-3">
+        One-line Install (recommended)
+      </h3>
       <Tabs defaultValue="linux">
         <TabsList>
           <TabsTrigger value="linux">Linux / macOS</TabsTrigger>
@@ -41,11 +43,14 @@ export function Installation() {
         correct location, and adds it to your system PATH automatically.
       </p>
 
-      <h3 className="text-lg font-semibold mt-8 mb-3">Post-install: Adding to PATH</h3>
+      <h3 className="text-lg font-semibold mt-8 mb-3">
+        Post-install: Adding to PATH
+      </h3>
       <p className="text-sm text-muted-foreground mb-3">
         The install scripts add pypmc to your PATH automatically. If{" "}
         <code className="bg-muted px-1 py-0.5 rounded text-xs">pypmc</code> is
-        not recognized after installation, <strong className="text-foreground">restart your terminal</strong> and
+        not recognized after installation,{" "}
+        <strong className="text-foreground">restart your terminal</strong> and
         try again. If it still doesn't work, add the install location manually:
       </p>
       <div className="overflow-x-auto mb-4">
@@ -53,16 +58,28 @@ export function Installation() {
           <thead>
             <tr className="bg-muted/50">
               <th className="text-left px-4 py-2 font-medium">Platform</th>
-              <th className="text-left px-4 py-2 font-medium">Install location</th>
-              <th className="text-left px-4 py-2 font-medium">What to add to PATH</th>
+              <th className="text-left px-4 py-2 font-medium">
+                Install location
+              </th>
+              <th className="text-left px-4 py-2 font-medium">
+                What to add to PATH
+              </th>
             </tr>
           </thead>
           <tbody>
             {[
               ["Linux", "/usr/local/bin/pypmc", "Usually already in PATH"],
               ["macOS", "/usr/local/bin/pypmc", "Usually already in PATH"],
-              ["Windows (admin)", "%ProgramFiles%\\pypmc\\pypmc.exe", "%ProgramFiles%\\pypmc"],
-              ["Windows (no admin)", "%LOCALAPPDATA%\\pypmc\\pypmc.exe", "%LOCALAPPDATA%\\pypmc"],
+              [
+                "Windows (admin)",
+                "%ProgramFiles%\\pypmc\\pypmc.exe",
+                "%ProgramFiles%\\pypmc",
+              ],
+              [
+                "Windows (no admin)",
+                "%LOCALAPPDATA%\\pypmc\\pypmc.exe",
+                "%LOCALAPPDATA%\\pypmc",
+              ],
             ].map(([platform, location, path]) => (
               <tr key={platform} className="border-t border-border">
                 <td className="px-4 py-2">{platform}</td>
@@ -110,43 +127,75 @@ fish_add_path /usr/local/bin`}
             <strong className="text-foreground">Option 1: Via GUI</strong>
           </p>
           <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground ml-2">
-            <li>Press <code className="bg-muted px-1 py-0.5 rounded text-xs">Win + R</code>, type <code className="bg-muted px-1 py-0.5 rounded text-xs">sysdm.cpl</code>, press Enter</li>
-            <li>Go to <strong className="text-foreground">Advanced</strong> tab &gt; <strong className="text-foreground">Environment Variables</strong></li>
             <li>
-              Select <code className="bg-muted px-1 py-0.5 rounded text-xs">Path</code> under{" "}
-              <strong className="text-foreground">System variables</strong> (admin) or{" "}
-              <strong className="text-foreground">User variables</strong> (no admin) and click <strong className="text-foreground">Edit</strong>
+              Press{" "}
+              <code className="bg-muted px-1 py-0.5 rounded text-xs">
+                Win + R
+              </code>
+              , type{" "}
+              <code className="bg-muted px-1 py-0.5 rounded text-xs">
+                sysdm.cpl
+              </code>
+              , press Enter
+            </li>
+            <li>
+              Go to <strong className="text-foreground">Advanced</strong> tab
+              &gt;{" "}
+              <strong className="text-foreground">Environment Variables</strong>
+            </li>
+            <li>
+              Select{" "}
+              <code className="bg-muted px-1 py-0.5 rounded text-xs">Path</code>{" "}
+              under{" "}
+              <strong className="text-foreground">System variables</strong>{" "}
+              (admin) or{" "}
+              <strong className="text-foreground">User variables</strong> (no
+              admin) and click <strong className="text-foreground">Edit</strong>
             </li>
             <li>
               Click <strong className="text-foreground">New</strong> and add:{" "}
-              <code className="bg-muted px-1 py-0.5 rounded text-xs">%ProgramFiles%\pypmc</code> (admin) or{" "}
-              <code className="bg-muted px-1 py-0.5 rounded text-xs">%LOCALAPPDATA%\pypmc</code> (no admin)
+              <code className="bg-muted px-1 py-0.5 rounded text-xs">
+                %ProgramFiles%\pypmc
+              </code>{" "}
+              (admin) or{" "}
+              <code className="bg-muted px-1 py-0.5 rounded text-xs">
+                %LOCALAPPDATA%\pypmc
+              </code>{" "}
+              (no admin)
             </li>
             <li>Click OK, then restart your terminal</li>
           </ol>
           <p className="text-sm text-muted-foreground mt-4">
-            <strong className="text-foreground">Option 2: Via CMD (admin)</strong>
+            <strong className="text-foreground">
+              Option 2: Via CMD (admin)
+            </strong>
           </p>
           <CodeBlock
             code={`reg add "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment" /v Path /t REG_EXPAND_SZ /d "%Path%;%ProgramFiles%\\pypmc" /f`}
             language="batch"
           />
           <p className="text-sm text-muted-foreground">
-            <strong className="text-foreground">Option 2: Via CMD (no admin)</strong>
+            <strong className="text-foreground">
+              Option 2: Via CMD (no admin)
+            </strong>
           </p>
           <CodeBlock
             code={`setx PATH "%PATH%;%LOCALAPPDATA%\\pypmc"`}
             language="batch"
           />
           <p className="text-sm text-muted-foreground mt-3">
-            <strong className="text-foreground">Option 3: Via PowerShell (admin)</strong>
+            <strong className="text-foreground">
+              Option 3: Via PowerShell (admin)
+            </strong>
           </p>
           <CodeBlock
             code={`[Environment]::SetEnvironmentVariable("Path", "$([Environment]::GetEnvironmentVariable('Path', 'Machine'));$env:ProgramFiles\\pypmc", "Machine")`}
             language="powershell"
           />
           <p className="text-sm text-muted-foreground">
-            <strong className="text-foreground">Option 3: Via PowerShell (no admin)</strong>
+            <strong className="text-foreground">
+              Option 3: Via PowerShell (no admin)
+            </strong>
           </p>
           <CodeBlock
             code={`[Environment]::SetEnvironmentVariable("Path", "$([Environment]::GetEnvironmentVariable('Path', 'User'));$env:LOCALAPPDATA\\pypmc", "User")`}
@@ -224,8 +273,13 @@ make`}
       />
       <p className="text-sm text-muted-foreground mt-2">
         The binary is at{" "}
-        <code className="bg-muted px-1 py-0.5 rounded text-xs">build/pypmc</code> (or{" "}
-        <code className="bg-muted px-1 py-0.5 rounded text-xs">build/Release/pypmc.exe</code>{" "}
+        <code className="bg-muted px-1 py-0.5 rounded text-xs">
+          build/pypmc
+        </code>{" "}
+        (or{" "}
+        <code className="bg-muted px-1 py-0.5 rounded text-xs">
+          build/Release/pypmc.exe
+        </code>{" "}
         on Windows).
       </p>
 

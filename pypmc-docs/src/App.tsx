@@ -1,8 +1,8 @@
 import {
   Sheet,
-  SheetContent,
-  SheetHeader,
   SheetTitle,
+  SheetHeader,
+  SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import {
@@ -26,11 +26,11 @@ import {
   Lockfile,
   PackageYml,
 } from "@/components/docs/sections/Configuration";
+import { navGroups } from "@/data";
 import { Button } from "@/components/ui/button";
+import { Sidebar } from "@/components/docs/Sidebar";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sidebar } from "@/components/docs/Sidebar";
-import { navGroups } from "@/components/docs/nav-data";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { QuickStart } from "@/components/docs/sections/QuickStart";
 import { Introduction } from "@/components/docs/sections/Introduction";
@@ -154,7 +154,7 @@ function App() {
           </Button>
 
           <a
-            href="https://github.com/subh-skd"
+            href="https://github.com/subh-skd/pypmc-cli"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"

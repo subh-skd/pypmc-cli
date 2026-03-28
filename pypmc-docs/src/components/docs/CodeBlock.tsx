@@ -1,12 +1,7 @@
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
+import type { CodeBlockProps } from "@/types";
 import { Button } from "@/components/ui/button";
-
-interface CodeBlockProps {
-  code: string;
-  language?: string;
-  title?: string;
-}
 
 export function CodeBlock({ code, language, title }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);

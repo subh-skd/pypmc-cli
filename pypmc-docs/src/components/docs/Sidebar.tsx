@@ -1,11 +1,7 @@
 import { cn } from "@/lib/utils";
+import { navGroups } from "@/data";
+import type { SidebarProps } from "@/types";
 import { Separator } from "@/components/ui/separator";
-import { navGroups } from "@/components/docs/nav-data";
-
-interface SidebarProps {
-  activeSection: string;
-  onNavigate: (id: string) => void;
-}
 
 export function Sidebar({ activeSection, onNavigate }: SidebarProps) {
   return (

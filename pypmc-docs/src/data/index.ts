@@ -1,12 +1,4 @@
-export interface NavItem {
-  id: string;
-  label: string;
-}
-
-export interface NavGroup {
-  title: string;
-  items: NavItem[];
-}
+import type { NavGroup } from "@/types";
 
 export const navGroups: NavGroup[] = [
   {
